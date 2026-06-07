@@ -127,6 +127,7 @@ def _parse(xml_text: str, sub: str, seen: set, out: list, strict: bool) -> None:
         out.append({
             "platform": f"Reddit r/{sub}",
             "event": title[:120],
+            "body": body[:600],     # kept for availability checker
             "date": "",
             "venue": "",
             "url": url,

@@ -114,6 +114,22 @@
     }
     .buy:hover { background: #1d7fd4; }
 
+    .dismiss-btn {
+      background: none; border: none; color: var(--muted);
+      cursor: pointer; font-size: 0.85rem; padding: 2px 5px; border-radius: 4px;
+      opacity: 0.45; line-height: 1; margin-left: 4px; vertical-align: middle;
+    }
+    .dismiss-btn:hover { color: #f87171; opacity: 1; }
+    tr.dismissed td { opacity: 0.28; text-decoration: line-through; }
+    tr.dismissed .actions-cell { text-decoration: none !important; opacity: 1 !important; }
+    .av-badge {
+      display: inline-block; padding: 1px 5px; border-radius: 3px;
+      font-size: 0.62rem; font-weight: 800; vertical-align: middle; margin-left: 4px;
+    }
+    .av-sold      { background: rgba(248,113,113,0.18); color: #f87171; }
+    .av-available { background: rgba(34,197,94,0.18);   color: var(--green); }
+    .av-uncertain { background: rgba(122,147,181,0.18); color: var(--muted); }
+
     .empty { text-align: center; padding: 60px; color: var(--muted); }
     .spinner {
       width: 32px; height: 32px; border: 3px solid var(--border);
@@ -156,6 +172,7 @@
   <button class="filter-btn" onclick="setFilter('reddit',this)">Reddit</button>
   <button class="filter-btn" onclick="setFilter('low',this)">⭐ All-time lows</button>
   <button class="filter-btn" onclick="setFilter('deal',this)">Below ceiling</button>
+  <button class="filter-btn" id="dismissedBtn" onclick="toggleDismissed()" style="display:none">Show dismissed (0)</button>
   <input class="search-box" id="searchBox" placeholder="Search…" oninput="render()">
 </div>
 
@@ -204,6 +221,44 @@ ceilingInput.addEventListener('input', () => {
 
 function CEILING() { return getCeiling(); }
 
+// ── dismiss / restore ────────────────────────────────────────────────────────
+const LS_DISMISSED_KEY = 'wc2026_dismissed';
+function getDismissed() {
+  try { return new Set(JSON.parse(localStorage.getItem(LS_DISMISSED_KEY) || '[]')); }
+  catch { return new Set(); }
+}
+function dismiss(key) {
+  const s = getDismissed(); s.add(key);
+  localStorage.setItem(LS_DISMISSED_KEY, JSON.stringify([...s]));
+  render(); updateToolbar();
+}
+function restore(key) {
+  const s = getDismissed(); s.delete(key);
+  localStorage.setItem(LS_DISMISSED_KEY, JSON.stringify([...s]));
+  render(); updateToolbar();
+}
+let showDismissed = false;
+function toggleDismissed() {
+  showDismissed = !showDismissed;
+  updateToolbar(); render();
+}
+function updateToolbar() {
+  const n = getDismissed().size;
+  const btn = document.getElementById('dismissedBtn');
+  if (!btn) return;
+  btn.textContent = showDismissed ? `Hide dismissed (${n})` : `Show dismissed (${n})`;
+  btn.style.display = n === 0 ? 'none' : '';
+}
+
+// ── availability badge (Reddit only) ─────────────────────────────────────────
+function avBadge(r) {
+  if (!r.platform.toLowerCase().includes('reddit')) return '';
+  const av = r.availability || '';
+  if (av === 'sold')      return '<span class="av-badge av-sold">SOLD</span>';
+  if (av === 'available') return '<span class="av-badge av-available">LIVE</span>';
+  return '<span class="av-badge av-uncertain">?</span>';
+}
+
 // ── platform badge ────────────────────────────────────────────────────────────
 function platBadge(p) {
   if (p.startsWith('Ticketmaster')) return '<span class="plat plat-tm">TM</span>';
@@ -247,7 +302,11 @@ function matchFilter(row, f) {
 // ── render ────────────────────────────────────────────────────────────────────
 function render() {
   const q = document.getElementById('searchBox').value.toLowerCase().trim();
-  let visible = allRows.filter(r => matchFilter(r, currentFilter) && (!q || matchText(r, q)));
+  const dismissed = getDismissed();
+  let visible = allRows.filter(r => {
+    if (dismissed.has(r._key) && !showDismissed) return false;
+    return matchFilter(r, currentFilter) && (!q || matchText(r, q));
+  });
   visible.sort((a,b) => {
     let va = a[sortCol]??'', vb = b[sortCol]??'';
     if (typeof va==='string') va=va.toLowerCase();
@@ -266,22 +325,28 @@ function render() {
   document.getElementById('empty').style.display='none';
 
   for (const r of visible) {
-    const isLow  = r.last_price!=null && r.min_seen!=null && r.last_price<=r.min_seen;
-    const isDeal = r.last_price!=null && r.last_price<CEILING();
-    const cls = isLow ? 'is-low' : isDeal ? 'is-deal' : '';
+    const isDismissed = dismissed.has(r._key);
+    const isLow  = !isDismissed && r.last_price!=null && r.min_seen!=null && r.last_price<=r.min_seen;
+    const isDeal = !isDismissed && r.last_price!=null && r.last_price<CEILING();
+    const cls = [isDismissed?'dismissed':'', isLow?'is-low':'', isDeal&&!isLow?'is-deal':''].filter(Boolean).join(' ');
     const tags = (isLow ? '<span class="tag tag-low">★ LOW</span>' : '') +
                  (isDeal&&!isLow ? '<span class="tag tag-deal">DEAL</span>' : '');
-    const curStr  = r.last_price!=null ? `$${Math.round(r.last_price)}` : '—';
-    const bestStr = r.min_seen!=null   ? `$${Math.round(r.min_seen)} best` : '';
-    const minStr  = r.min_seen!=null   ? `$${Math.round(r.min_seen)}` : '—';
-    const date    = (r.date||'').slice(0,10) || '—';
-    const link    = r.url ? `<a class="buy" href="${esc(r.url)}" target="_blank" rel="noopener">View →</a>` : '—';
+    const av       = avBadge(r);
+    const curStr   = r.last_price!=null ? `$${Math.round(r.last_price)}` : '—';
+    const bestStr  = r.min_seen!=null   ? `$${Math.round(r.min_seen)} best` : '';
+    const minStr   = r.min_seen!=null   ? `$${Math.round(r.min_seen)}` : '—';
+    const date     = (r.date||'').slice(0,10) || '—';
+    const link     = r.url ? `<a class="buy" href="${esc(r.url)}" target="_blank" rel="noopener">View →</a>` : '';
+    const keyEsc   = esc(r._key||'');
+    const actionBtn = isDismissed
+      ? `<button class="dismiss-btn" title="Restore listing" onclick="restore('${keyEsc}')">↩</button>`
+      : `<button class="dismiss-btn" title="Mark unavailable / dismiss" onclick="dismiss('${keyEsc}')">✕</button>`;
 
     tbody.insertAdjacentHTML('beforeend', `
       <tr class="${cls}">
         <td>${platBadge(r.platform)}</td>
         <td><div class="ev-name" title="${esc(r.event||'')}">
-          ${esc((r.event||'—').slice(0,90))}${tags}
+          ${esc((r.event||'—').slice(0,90))}${tags}${av}
         </div></td>
         <td style="white-space:nowrap;color:var(--muted)">${date}</td>
         <td style="color:var(--muted);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.venue||'—')}</td>
@@ -291,7 +356,7 @@ function render() {
         </td>
         <td style="color:var(--muted)">${minStr}</td>
         <td style="color:var(--muted);white-space:nowrap">${timeAgo(r.last_checked)}</td>
-        <td>${link}</td>
+        <td class="actions-cell" style="white-space:nowrap">${link}${actionBtn}</td>
       </tr>`);
   }
 }
@@ -341,7 +406,7 @@ async function load() {
     const res = await fetch('prices.json?_='+Date.now());
     if (!res.ok) throw new Error(res.status);
     const data = await res.json();
-    allRows = Object.values(data);
+    allRows = Object.entries(data).map(([k,v]) => ({...v, _key: k}));
 
     document.getElementById('spinner').style.display='none';
 
@@ -352,6 +417,7 @@ async function load() {
       `${platforms.length} platforms · last check ${timeAgo(lastCheck)} · auto-refreshes every 5 min`;
 
     updateSummary();
+    updateToolbar();
     render();
   } catch(e) {
     document.getElementById('spinner').outerHTML =

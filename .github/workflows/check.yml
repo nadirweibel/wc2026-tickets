@@ -40,6 +40,7 @@ jobs:
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
           ALERT_EMAIL: ${{ secrets.ALERT_EMAIL }}
           PRICE_CEILING: ${{ secrets.PRICE_CEILING }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: python checker.py
 
       - name: Commit updated price history

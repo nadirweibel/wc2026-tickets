@@ -14,6 +14,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from platforms import ticketmaster, seatgeek, stubhub, vividseats, fifa, reddit
+from platforms import availability
 import notify
 
 PRICE_CEILING = float(os.environ.get("PRICE_CEILING", "500"))
@@ -100,17 +101,42 @@ def main() -> None:
 
     for listing in listings:
         price = listing.get("min_price")
-        if price is None:
-            continue
-
         key = make_key(listing)
         prev = history.get(key, {})
-        prev_min = prev.get("min_seen")
 
+        # Always persist monitored events, even with no price yet
+        if price is None:
+            history[key] = {
+                **prev,
+                "event": listing["event"],
+                "platform": listing["platform"],
+                "date": listing.get("date", ""),
+                "venue": listing.get("venue", ""),
+                "url": listing.get("url", ""),
+                "min_seen": prev.get("min_seen"),
+                "last_price": None,
+                "last_checked": now,
+            }
+            continue
+
+        # Availability check for Reddit posts
+        av_status = prev.get("availability", "")
+        is_reddit = listing["platform"].lower().startswith("reddit")
+        if is_reddit and availability.should_recheck(prev):
+            av_status = availability.check(
+                listing.get("url", ""),
+                listing.get("event", ""),
+                listing.get("body", ""),
+            )
+            label = {"sold": "SOLD", "available": "LIVE", "uncertain": "?"}.get(av_status, "?")
+            print(f"  availability [{label}] {listing['event'][:55]}")
+
+        prev_min = prev.get("min_seen")
         is_new_low = prev_min is None or price < prev_min
         below_ceiling = price < PRICE_CEILING
 
-        if is_new_low and below_ceiling:
+        # Don't alert on sold listings
+        if is_new_low and below_ceiling and av_status != "sold":
             alerts.append({**listing, "prev_min": prev_min})
             prev_str = f"${prev_min:.0f}" if prev_min else "first seen"
             print(f"  ALERT  {listing['platform']:15s} | {listing['event'][:60]} | ${price:.0f} (was {prev_str})")
@@ -124,6 +150,7 @@ def main() -> None:
             "min_seen": min(price, prev_min) if prev_min is not None else price,
             "last_price": price,
             "last_checked": now,
+            **({"availability": av_status, "av_checked_at": now} if is_reddit else {}),
         }
 
     save_history(history)
