@@ -203,6 +203,32 @@
     }
     .dismiss-btn:hover { color: var(--red); opacity: 1; }
 
+    /* ── SeatGeek manual price entry ── */
+    .sg-entry-wrap { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .sg-enter-btn {
+      font-size: 0.72rem; color: var(--accent); background: none;
+      border: 1px solid var(--accent); border-radius: 6px; padding: 3px 10px;
+      cursor: pointer; white-space: nowrap;
+    }
+    .sg-enter-btn:hover { background: rgba(26,111,190,0.18); }
+    .sg-open-link { font-size: 0.68rem; color: var(--muted); text-decoration: none; }
+    .sg-open-link:hover { color: var(--accent); }
+    .sg-entry-form { display: flex; align-items: center; gap: 4px; }
+    .sg-price-input {
+      background: rgba(255,255,255,0.06); border: 1px solid var(--accent);
+      color: var(--text); border-radius: 6px; padding: 4px 8px;
+      font-size: 0.9rem; width: 72px; outline: none; text-align: center;
+    }
+    .sg-save-btn {
+      background: var(--accent); color: #fff; border: none; border-radius: 6px;
+      padding: 4px 10px; font-size: 0.72rem; cursor: pointer; font-weight: 600;
+    }
+    .sg-save-btn:hover { background: #1d7fd4; }
+    .sg-cancel-btn {
+      background: none; border: none; color: var(--muted); cursor: pointer;
+      font-size: 0.72rem; padding: 4px 6px;
+    }
+
     /* ── no-listings placeholder ── */
     .no-data { font-size: 0.8rem; color: var(--muted); padding: 14px 24px; font-style: italic; }
 
@@ -414,6 +440,50 @@ function avBadge(row) {
   return '<span class="av-badge av-uncertain">?</span>';
 }
 
+// ── SeatGeek manual prices (localStorage, since DataDome blocks all automation) ────
+const LS_SG = 'wc2026_sg_v1';
+function getSgPrices() {
+  try { return JSON.parse(localStorage.getItem(LS_SG) || '{}'); } catch { return {}; }
+}
+function setSgPrice(eventKey, price) {
+  const p = getSgPrices();
+  p[eventKey] = { price: parseFloat(price), ts: new Date().toISOString() };
+  localStorage.setItem(LS_SG, JSON.stringify(p));
+}
+function clearSgPrice(eventKey) {
+  const p = getSgPrices();
+  delete p[eventKey];
+  localStorage.setItem(LS_SG, JSON.stringify(p));
+  renderAll();
+}
+function sgEnterPrice(btn, eventKey) {
+  const wrap = btn.closest('.sg-entry-wrap');
+  const input = document.createElement('input');
+  input.type = 'number'; input.min = '1'; input.max = '9999'; input.step = '1';
+  input.placeholder = '350'; input.className = 'sg-price-input';
+  const save = document.createElement('button');
+  save.className = 'sg-save-btn'; save.textContent = 'Save';
+  const cancel = document.createElement('button');
+  cancel.className = 'sg-cancel-btn'; cancel.textContent = '✕';
+  const form = document.createElement('div');
+  form.className = 'sg-entry-form';
+  form.appendChild(input); form.appendChild(save); form.appendChild(cancel);
+  wrap.innerHTML = '<span style="color:var(--muted);font-size:0.85rem">$</span>';
+  wrap.appendChild(form);
+  input.focus();
+  const doSave = () => {
+    const v = parseFloat(input.value);
+    if (!isNaN(v) && v > 0) { setSgPrice(eventKey, v); renderAll(); }
+  };
+  save.addEventListener('click', doSave);
+  cancel.addEventListener('click', () => renderAll());
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') doSave();
+    if (e.key === 'Escape') renderAll();
+  });
+}
+function sgEditPrice(btn, eventKey) { sgEnterPrice(btn, eventKey); }
+
 // ── Render one platform row ───────────────────────────────────────────────────
 function renderPlatRow(plat, rows, history) {
   // Find best (lowest current price) entry for this platform+game combination
@@ -431,22 +501,52 @@ function renderPlatRow(plat, rows, history) {
   const C = getCeiling();
   let html = '';
   for (const r of matching) {
-    const price  = r.last_price;
+    const isSeatGeek = r.platform === 'SeatGeek';
+
+    // For SeatGeek, merge manual localStorage price with scraped price
+    const sgPrices = isSeatGeek ? getSgPrices() : {};
+    const sgEntry  = isSeatGeek ? sgPrices[r.event] : null;
+    let price      = r.last_price != null ? r.last_price : (sgEntry ? sgEntry.price : null);
+    const isManual = isSeatGeek && r.last_price == null && sgEntry != null;
+
     const minSeen = r.min_seen;
     const isLow  = price != null && minSeen != null && price <= minSeen;
     const isDeal = price != null && price < C;
-    // SeatGeek: API returns null prices (DataDome blocks scraping + free-tier API has no pricing).
-    // Show a direct-link button instead so the user can check the live price manually.
-    const isSeatGeek = r.platform === 'SeatGeek';
-    const priceStr = price != null
-      ? `<span class="plat-price">$${Math.round(price)}</span>`
-      : isSeatGeek && r.url
-        ? `<a class="sg-check-link" href="${esc(r.url)}" target="_blank" rel="noopener">Check prices →</a>`
-        : `<span class="plat-price monitoring">Monitoring…</span>`;
-    // StubHub JSON-LD gives BASE prices (pre-fee); DOM prices from Playwright are all-in.
-    // Only add 'all-in' when price_note is explicitly set by the scraper.
-    const note = r.price_note || '';
-    const noteStr = note ? `<div class="plat-note">${esc(note)} · checked ${timeAgo(r.last_checked)}</div>` : `<div class="plat-note">checked ${timeAgo(r.last_checked)}</div>`;
+
+    // Build the price display
+    let priceStr;
+    if (price != null) {
+      priceStr = `<span class="plat-price">$${Math.round(price)}</span>`;
+      if (isManual) {
+        const ekEsc = esc(r.event).replace(/'/g, "\\'");
+        priceStr += ` <button class="sg-enter-btn" style="font-size:0.62rem;padding:2px 7px" onclick="sgEditPrice(this,'${ekEsc}')">Edit</button>`;
+      }
+    } else if (isSeatGeek) {
+      // No price yet — show inline entry UI
+      const openHref = r.url ? esc(r.url) : 'https://seatgeek.com';
+      const ekEsc = esc(r.event).replace(/'/g, "\\'");
+      priceStr = `<div class="sg-entry-wrap">
+        <button class="sg-enter-btn" onclick="sgEnterPrice(this,'${ekEsc}')">+ Enter price</button>
+        <a class="sg-open-link" href="${openHref}" target="_blank" rel="noopener">open SeatGeek ↗</a>
+      </div>`;
+    } else {
+      priceStr = `<span class="plat-price monitoring">Monitoring…</span>`;
+    }
+
+    // Build the note line
+    let noteStr;
+    if (isManual) {
+      const ekEsc = esc(r.event).replace(/'/g, "\\'");
+      noteStr = `<div class="plat-note">manual · updated ${timeAgo(sgEntry.ts)} · <button onclick="clearSgPrice('${ekEsc}')" style="background:none;border:none;color:var(--muted);font-size:inherit;cursor:pointer;padding:0;text-decoration:underline">clear</button></div>`;
+    } else if (isSeatGeek && !price) {
+      noteStr = `<div class="plat-note">DataDome blocks automation — enter price manually above</div>`;
+    } else {
+      const note = r.price_note || '';
+      noteStr = note
+        ? `<div class="plat-note">${esc(note)} · checked ${timeAgo(r.last_checked)}</div>`
+        : `<div class="plat-note">checked ${timeAgo(r.last_checked)}</div>`;
+    }
+
     const tags = (isLow ? '<span class="tag-low">★ NEW LOW</span>' : '') + (isDeal && !isLow ? '<span class="tag-deal">DEAL</span>' : '');
     const countStr = (() => {
       if (r.ticket_count) return `<span class="plat-count">🎟 ${Number(r.ticket_count).toLocaleString()} tickets</span>`;
