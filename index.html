@@ -19,7 +19,7 @@
       --red:    #f87171;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; }
+    body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
 
     /* ── auth overlay ── */
     #auth-overlay {
@@ -112,7 +112,7 @@
     .tab-sep { width: 1px; background: var(--border); flex-shrink: 0; margin: 6px 2px; align-self: stretch; }
 
     /* ── game panels ── */
-    #game-panels { padding: 20px 28px 60px; }
+    #game-panels { flex: 1; min-height: 0; overflow-y: auto; padding: 20px 28px 60px; }
     .game-panel { display: none; }
     .game-panel.active { display: block; }
 
