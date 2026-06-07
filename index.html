@@ -442,7 +442,9 @@ function renderPlatRow(plat, rows, history) {
       : isSeatGeek && r.url
         ? `<a class="sg-check-link" href="${esc(r.url)}" target="_blank" rel="noopener">Check prices →</a>`
         : `<span class="plat-price monitoring">Monitoring…</span>`;
-    const note = r.price_note || (r.platform === 'StubHub' ? 'all-in' : '');
+    // StubHub JSON-LD gives BASE prices (pre-fee); DOM prices from Playwright are all-in.
+    // Only add 'all-in' when price_note is explicitly set by the scraper.
+    const note = r.price_note || '';
     const noteStr = note ? `<div class="plat-note">${esc(note)} · checked ${timeAgo(r.last_checked)}</div>` : `<div class="plat-note">checked ${timeAgo(r.last_checked)}</div>`;
     const tags = (isLow ? '<span class="tag-low">★ NEW LOW</span>' : '') + (isDeal && !isLow ? '<span class="tag-deal">DEAL</span>' : '');
     const countStr = (() => {
