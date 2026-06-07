@@ -1,0 +1,54 @@
+name: WC2026 Ticket Price Check
+
+on:
+  schedule:
+    # Runs every hour at :00. GitHub Actions uses UTC; SoFi games are in PT (UTC-7).
+    - cron: '0 * * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Set to "true" to run without sending email'
+        required: false
+        default: 'false'
+
+permissions:
+  contents: write   # needed to commit prices.json back to the repo
+
+jobs:
+  check-prices:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run price checker
+        env:
+          TM_API_KEY: ${{ secrets.TM_API_KEY }}
+          SG_CLIENT_ID: ${{ secrets.SG_CLIENT_ID }}
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          ALERT_EMAIL: ${{ secrets.ALERT_EMAIL }}
+          PRICE_CEILING: ${{ secrets.PRICE_CEILING }}
+          REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
+          REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
+        run: python checker.py
+
+      - name: Commit updated price history
+        run: |
+          git config user.name  "Price Checker Bot"
+          git config user.email "price-bot@noreply.github.com"
+          git add prices.json prices_log.csv
+          git diff --staged --quiet || \
+            git commit -m "prices: $(date -u +%Y-%m-%dT%H:%MZ)" && \
+            git push
