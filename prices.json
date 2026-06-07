@@ -1,14 +1,4 @@
 {
-  "Reddit r/WorldCup2026Tickets|Selling France vs Senegal ($600)||1tyz31h": {
-    "event": "Selling France vs Senegal ($600)",
-    "platform": "Reddit r/WorldCup2026Tickets",
-    "date": "",
-    "venue": "",
-    "url": "https://www.reddit.com/r/WorldCup2026Tickets/comments/1tyz31h/selling_france_vs_senegal_600/",
-    "min_seen": 600.0,
-    "last_price": 600.0,
-    "last_checked": "2026-06-07T02:36:14.713325+00:00"
-  },
   "Reddit r/WorldCup2026Tickets|M26 Switzerland vs Bosnia and Herzegovina- Sofi Stadium $320/ticket||1tywwtu": {
     "event": "M26 Switzerland vs Bosnia and Herzegovina- Sofi Stadium $320/ticket",
     "platform": "Reddit r/WorldCup2026Tickets",
@@ -17,7 +7,9 @@
     "url": "https://www.reddit.com/r/WorldCup2026Tickets/comments/1tywwtu/m26_switzerland_vs_bosnia_and_herzegovina_sofi/",
     "min_seen": 320.0,
     "last_price": 320.0,
-    "last_checked": "2026-06-07T02:36:14.713325+00:00"
+    "last_checked": "2026-06-07T02:48:28.803731+00:00",
+    "availability": "uncertain",
+    "av_checked_at": "2026-06-07T02:48:28.803731+00:00"
   },
   "Reddit r/WorldCup2026Tickets|4 Tickets Switzerland vs Bosnia - $375 each, Category 1||1tysqq8": {
     "event": "4 Tickets Switzerland vs Bosnia - $375 each, Category 1",
@@ -27,7 +19,9 @@
     "url": "https://www.reddit.com/r/WorldCup2026Tickets/comments/1tysqq8/4_tickets_switzerland_vs_bosnia_375_each_category/",
     "min_seen": 375.0,
     "last_price": 375.0,
-    "last_checked": "2026-06-07T02:36:14.713325+00:00"
+    "last_checked": "2026-06-07T02:48:28.803731+00:00",
+    "availability": "uncertain",
+    "av_checked_at": "2026-06-07T02:48:28.803731+00:00"
   },
   "Reddit r/WorldCup2026Tickets|Still have ticket for Switzerland vs qatar it's bleachers I'm more than likely going but if anyone is interested lmk $22||1twp5ti": {
     "event": "Still have ticket for Switzerland vs qatar it's bleachers I'm more than likely going but if anyone is interested lmk $22",
@@ -37,17 +31,9 @@
     "url": "https://www.reddit.com/r/WorldCup2026Tickets/comments/1twp5ti/still_have_ticket_for_switzerland_vs_qatar_its/",
     "min_seen": 220.0,
     "last_price": 220.0,
-    "last_checked": "2026-06-07T02:36:14.713325+00:00"
-  },
-  "Reddit r/WorldCup2026Tickets|Selling 2x USA vs AUS, Cat 3, Block 319, Row Y, Seats 5 & 6, $2000 Each, Open to Negotiate||1tyvr36": {
-    "event": "Selling 2x USA vs AUS, Cat 3, Block 319, Row Y, Seats 5 & 6, $2000 Each, Open to Negotiate",
-    "platform": "Reddit r/WorldCup2026Tickets",
-    "date": "",
-    "venue": "",
-    "url": "https://www.reddit.com/r/WorldCup2026Tickets/comments/1tyvr36/selling_2x_usa_vs_aus_cat_3_block_319_row_y_seats/",
-    "min_seen": 2000.0,
-    "last_price": 2000.0,
-    "last_checked": "2026-06-07T02:36:14.713325+00:00"
+    "last_checked": "2026-06-07T02:48:28.803731+00:00",
+    "availability": "available",
+    "av_checked_at": "2026-06-07T02:48:28.803731+00:00"
   },
   "Reddit r/WorldCup2026Tickets|New Zealand / Iran June 15th - Category 1 tickets. $535USD each||1typr6l": {
     "event": "New Zealand / Iran June 15th - Category 1 tickets. $535USD each",
@@ -57,6 +43,138 @@
     "url": "https://www.reddit.com/r/WorldCup2026Tickets/comments/1typr6l/new_zealand_iran_june_15th_category_1_tickets/",
     "min_seen": 535.0,
     "last_price": 535.0,
-    "last_checked": "2026-06-07T02:36:14.713325+00:00"
+    "last_checked": "2026-06-07T02:48:28.803731+00:00",
+    "availability": "uncertain",
+    "av_checked_at": "2026-06-07T02:48:28.803731+00:00"
+  },
+  "Ticketmaster|World Cup: Match 8 Group B- Qatar vs Switzerland|2026-06-13|": {
+    "event": "World Cup: Match 8 Group B- Qatar vs Switzerland",
+    "platform": "Ticketmaster",
+    "date": "2026-06-13",
+    "venue": "Levi's Stadium",
+    "url": "https://www.ticketmaster.com/event/Z7r9jZ1A7433K",
+    "min_seen": null,
+    "last_price": null,
+    "last_checked": "2026-06-07T02:48:28.803731+00:00"
+  },
+  "Ticketmaster|World Cup: Match 26 Group B - Switzerland vs Bosnia-Herzegovina|2026-06-18|": {
+    "event": "World Cup: Match 26 Group B - Switzerland vs Bosnia-Herzegovina",
+    "platform": "Ticketmaster",
+    "date": "2026-06-18",
+    "venue": "SoFi Stadium",
+    "url": "https://www.ticketmaster.com/event/Z7r9jZ1A743f3",
+    "min_seen": null,
+    "last_price": null,
+    "last_checked": "2026-06-07T02:48:28.803731+00:00"
+  },
+  "Ticketmaster|World Cup: Match 51 Group B - Switzerland vs Canada|2026-06-24|": {
+    "event": "World Cup: Match 51 Group B - Switzerland vs Canada",
+    "platform": "Ticketmaster",
+    "date": "2026-06-24",
+    "venue": "BC Place Stadium",
+    "url": "https://www.ticketmaster.ca/event/Z7r9jZ1A743fg",
+    "min_seen": null,
+    "last_price": null,
+    "last_checked": "2026-06-07T02:48:28.803731+00:00"
+  },
+  "Ticketmaster|World Cup: Match 4 Group D - USA vs Paraguay|2026-06-12|": {
+    "event": "World Cup: Match 4 Group D - USA vs Paraguay",
+    "platform": "Ticketmaster",
+    "date": "2026-06-12",
+    "venue": "SoFi Stadium",
+    "url": "https://www.ticketmaster.com/event/Z7r9jZ1A74333",
+    "min_seen": null,
+    "last_price": null,
+    "last_checked": "2026-06-07T02:48:28.803731+00:00"
+  },
+  "Ticketmaster|World Cup: Match 15 Group G - Iran vs New Zealand|2026-06-15|": {
+    "event": "World Cup: Match 15 Group G - Iran vs New Zealand",
+    "platform": "Ticketmaster",
+    "date": "2026-06-15",
+    "venue": "SoFi Stadium",
+    "url": "https://www.ticketmaster.com/event/Z7r9jZ1A743fe",
+    "min_seen": null,
+    "last_price": null,
+    "last_checked": "2026-06-07T02:48:28.803731+00:00"
+  },
+  "Ticketmaster|World Cup: Match 39 Group G - Belgium vs Iran|2026-06-21|": {
+    "event": "World Cup: Match 39 Group G - Belgium vs Iran",
+    "platform": "Ticketmaster",
+    "date": "2026-06-21",
+    "venue": "SoFi Stadium",
+    "url": "https://www.ticketmaster.com/event/Z7r9jZ1A743fN",
+    "min_seen": null,
+    "last_price": null,
+    "last_checked": "2026-06-07T02:48:28.803731+00:00"
+  },
+  "Ticketmaster|World Cup: Match 59 Group D - USA vs Turkey|2026-06-25|": {
+    "event": "World Cup: Match 59 Group D - USA vs Turkey",
+    "platform": "Ticketmaster",
+    "date": "2026-06-25",
+    "venue": "SoFi Stadium",
+    "url": "https://www.ticketmaster.com/event/Z7r9jZ1A7434Z",
+    "min_seen": null,
+    "last_price": null,
+    "last_checked": "2026-06-07T02:48:28.803731+00:00"
+  },
+  "Ticketmaster|World Cup Round of 32: 2A vs. 2B (Match 73)|2026-06-28|": {
+    "event": "World Cup Round of 32: 2A vs. 2B (Match 73)",
+    "platform": "Ticketmaster",
+    "date": "2026-06-28",
+    "venue": "SoFi Stadium",
+    "url": "https://www.ticketmaster.com/event/Z7r9jZ1A7434f",
+    "min_seen": null,
+    "last_price": null,
+    "last_checked": "2026-06-07T02:48:28.803731+00:00"
+  },
+  "Ticketmaster|World Cup Round of 32: 1H vs. 2J (Match 84)|2026-07-02|": {
+    "event": "World Cup Round of 32: 1H vs. 2J (Match 84)",
+    "platform": "Ticketmaster",
+    "date": "2026-07-02",
+    "venue": "SoFi Stadium",
+    "url": "https://www.ticketmaster.com/event/Z7r9jZ1A7434N",
+    "min_seen": null,
+    "last_price": null,
+    "last_checked": "2026-06-07T02:48:28.803731+00:00"
+  },
+  "Ticketmaster|World Cup Quarterfinals: W93 vs. W94 (Match 98)|2026-07-10|": {
+    "event": "World Cup Quarterfinals: W93 vs. W94 (Match 98)",
+    "platform": "Ticketmaster",
+    "date": "2026-07-10",
+    "venue": "SoFi Stadium",
+    "url": "https://www.ticketmaster.com/event/Z7r9jZ1A7434U",
+    "min_seen": null,
+    "last_price": null,
+    "last_checked": "2026-06-07T02:48:28.803731+00:00"
+  },
+  "SeatGeek|Switzerland vs Qatar - World Cup - Match 8 (Group B)|2026-06-13T12:00:00|": {
+    "event": "Switzerland vs Qatar - World Cup - Match 8 (Group B)",
+    "platform": "SeatGeek",
+    "date": "2026-06-13T12:00:00",
+    "venue": "Levi's Stadium",
+    "url": "https://seatgeek.com/fifa-world-cup-tickets/international-soccer/2026-06-13-12-pm/17171556",
+    "min_seen": null,
+    "last_price": null,
+    "last_checked": "2026-06-07T02:48:28.803731+00:00"
+  },
+  "SeatGeek|Switzerland vs Bosnia & Herzegovina - World Cup - Match 26 (Group B)|2026-06-18T12:00:00|": {
+    "event": "Switzerland vs Bosnia & Herzegovina - World Cup - Match 26 (Group B)",
+    "platform": "SeatGeek",
+    "date": "2026-06-18T12:00:00",
+    "venue": "SoFi Stadium",
+    "url": "https://seatgeek.com/fifa-world-cup-tickets/international-soccer/2026-06-18-12-pm/17176205",
+    "min_seen": null,
+    "last_price": null,
+    "last_checked": "2026-06-07T02:48:28.803731+00:00"
+  },
+  "SeatGeek|Canada vs Switzerland - World Cup - Match 51 (Group B)|2026-06-24T12:00:00|": {
+    "event": "Canada vs Switzerland - World Cup - Match 51 (Group B)",
+    "platform": "SeatGeek",
+    "date": "2026-06-24T12:00:00",
+    "venue": "BC Place Stadium",
+    "url": "https://seatgeek.com/fifa-world-cup-tickets/international-soccer/2026-06-24-12-pm/17249641",
+    "min_seen": null,
+    "last_price": null,
+    "last_checked": "2026-06-07T02:48:28.803731+00:00"
   }
 }

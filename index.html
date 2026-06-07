@@ -138,6 +138,33 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
+    /* ── auth overlay ── */
+    #auth-overlay {
+      position: fixed; inset: 0; background: rgba(8,16,31,0.97);
+      display: none; align-items: center; justify-content: center;
+      z-index: 1000; backdrop-filter: blur(6px);
+    }
+    .auth-box {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 16px; padding: 40px 48px; text-align: center;
+      max-width: 380px; width: 90%;
+    }
+    .auth-box h2 { font-size: 1.3rem; font-weight: 800; margin-bottom: 6px; }
+    .auth-box p  { font-size: 0.8rem; color: var(--muted); margin-bottom: 24px; line-height: 1.5; }
+    .auth-input {
+      width: 100%; background: rgba(255,255,255,0.06); border: 1px solid var(--border);
+      color: var(--text); border-radius: 8px; padding: 10px 14px;
+      font-size: 1rem; outline: none; margin-bottom: 12px; text-align: center; letter-spacing: 2px;
+    }
+    .auth-input:focus { border-color: var(--accent); }
+    .auth-btn {
+      width: 100%; background: var(--accent); color: #fff; border: none;
+      border-radius: 8px; padding: 11px; font-size: 0.9rem; font-weight: 700;
+      cursor: pointer; margin-bottom: 8px;
+    }
+    .auth-btn:hover { background: #1d7fd4; }
+    .auth-error { font-size: 0.75rem; color: #f87171; min-height: 18px; margin-top: 4px; }
+
     @media (max-width: 700px) {
       header, .summary, .toolbar, .table-wrap { padding-left: 14px; padding-right: 14px; }
       .search-box { width: 140px; }
@@ -147,10 +174,27 @@
 </head>
 <body>
 
+<div id="auth-overlay">
+  <div class="auth-box">
+    <div style="font-size:2.8rem;margin-bottom:14px">🏆⚽🇨🇭</div>
+    <h2>WC2026 Ticket Tracker</h2>
+    <p>Private dashboard<br>Enter password to continue</p>
+    <form id="auth-form">
+      <input id="auth-input" class="auth-input" type="password" placeholder="Password" autocomplete="current-password">
+      <button type="submit" class="auth-btn">Enter →</button>
+    </form>
+    <div class="auth-error" id="auth-error"></div>
+  </div>
+</div>
+
 <header>
-  <div>
-    <h1>WC2026 <span>Ticket Tracker</span></h1>
-    <div class="meta" id="meta">Loading…</div>
+  <div style="display:flex;align-items:center;gap:14px">
+    <div style="font-size:2.6rem;line-height:1">🏆</div>
+    <div>
+      <h1>WC2026 <span>Ticket Tracker</span></h1>
+      <div class="meta" id="meta">Loading…</div>
+    </div>
+    <div style="font-size:2rem;line-height:1;opacity:0.85">🇨🇭</div>
   </div>
   <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
     <div class="ceiling-control">
@@ -197,6 +241,26 @@
 </div>
 
 <script>
+// ── auth gate ─────────────────────────────────────────────────────────────────
+const SITE_PW = 'wc2026';        // ← change this line to set your password
+const LS_AUTH = 'wc2026_auth_v1';
+
+function isAuthed() { return localStorage.getItem(LS_AUTH) === SITE_PW; }
+
+document.getElementById('auth-form').addEventListener('submit', e => {
+  e.preventDefault();
+  const pw = document.getElementById('auth-input').value;
+  if (pw === SITE_PW) {
+    localStorage.setItem(LS_AUTH, SITE_PW);
+    document.getElementById('auth-overlay').style.display = 'none';
+    load();
+  } else {
+    document.getElementById('auth-error').textContent = 'Wrong password — try again.';
+    document.getElementById('auth-input').value = '';
+    document.getElementById('auth-input').focus();
+  }
+});
+
 let allRows = [];
 let currentFilter = 'all';
 let sortCol = 'last_price';
@@ -332,7 +396,12 @@ function render() {
     const tags = (isLow ? '<span class="tag tag-low">★ LOW</span>' : '') +
                  (isDeal&&!isLow ? '<span class="tag tag-deal">DEAL</span>' : '');
     const av       = avBadge(r);
-    const curStr   = r.last_price!=null ? `$${Math.round(r.last_price)}` : '—';
+    const isMonitoring = r.last_price==null && !r.platform.toLowerCase().includes('reddit');
+    const curStr   = r.last_price!=null
+      ? `$${Math.round(r.last_price)}`
+      : isMonitoring
+        ? '<span style="font-size:0.7rem;color:var(--muted);font-style:italic">Monitoring…</span>'
+        : '—';
     const bestStr  = r.min_seen!=null   ? `$${Math.round(r.min_seen)} best` : '';
     const minStr   = r.min_seen!=null   ? `$${Math.round(r.min_seen)}` : '—';
     const date     = (r.date||'').slice(0,10) || '—';
@@ -427,8 +496,14 @@ async function load() {
   }
 }
 
-load();
-setInterval(load, 5*60*1000);   // auto-refresh every 5 minutes
+// Boot: show auth overlay or load data
+if (isAuthed()) {
+  load();
+} else {
+  document.getElementById('auth-overlay').style.display = 'flex';
+  document.getElementById('spinner').style.display = 'none';
+}
+setInterval(() => { if (isAuthed()) load(); }, 5*60*1000);
 </script>
 </body>
 </html>

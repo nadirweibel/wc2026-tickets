@@ -52,17 +52,17 @@ def _sweep() -> List[Dict]:
     results: List[Dict] = []
     seen: set = set()
 
-    # Primary: all new posts in r/WorldCup2026Tickets
-    _fetch(_f(_PRIMARY_SUB, "new"), {}, _PRIMARY_SUB, seen, results, strict=False)
-    time.sleep(0.5)
-
-    # Search r/WorldCup2026Tickets for Switzerland and SoFi specifically
-    for q in ["switzerland ticket", "sofi stadium ticket", "los angeles ticket"]:
-        _fetch(_f(_PRIMARY_SUB, "search"), {"q": q, "sort": "new", "restrict_sr": "1", "t": "month"},
-               _PRIMARY_SUB, seen, results, strict=False)
+    # Targeted searches only — never grab the unfiltered "new" feed.
+    # Each query is pre-scoped by Reddit's own search, then _is_relevant
+    # double-checks that the post body matches Switzerland or SoFi/LA.
+    for q in ["switzerland", "swiss tickets", "sofi stadium", "sofi ticket",
+              "inglewood world cup", "los angeles world cup"]:
+        _fetch(_f(_PRIMARY_SUB, "search"),
+               {"q": q, "sort": "new", "restrict_sr": "1", "t": "month"},
+               _PRIMARY_SUB, seen, results, strict=True)
         time.sleep(0.4)
 
-    # Other subs: stricter filter
+    # Other subs: strict filter
     for sub in _OTHER_SUBS:
         _fetch(_f(sub, "new"), {}, sub, seen, results, strict=True)
         time.sleep(0.4)
@@ -139,10 +139,15 @@ def _parse(xml_text: str, sub: str, seen: set, out: list, strict: bool) -> None:
 
 def _is_relevant(text: str) -> bool:
     t = text.lower()
-    has_wc = "world cup" in t or "fifa" in t or "wc2026" in t
-    has_target = "switzerland" in t or "swiss" in t or "sofi" in t or "inglewood" in t or "los angeles" in t
-    has_ticket = any(w in t for w in ("ticket", "seat", "wts", "wtb", "for sale", "face value", "fs:"))
-    return has_wc and has_target and has_ticket
+    has_target = (
+        "switzerland" in t or "swiss" in t or
+        "sofi" in t or "inglewood" in t or
+        ("los angeles" in t and ("world cup" in t or "wc2026" in t or "fifa" in t))
+    )
+    has_ticket = any(w in t for w in (
+        "ticket", "seat", "wts", "wtb", "for sale", "face value", "fs:", "selling", "$"
+    ))
+    return has_target and has_ticket
 
 
 def _extract_prices(text: str) -> List[float]:
