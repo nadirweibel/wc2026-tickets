@@ -86,9 +86,10 @@
 
     /* ── game tabs ── */
     .game-tabs {
-      display: flex; flex-wrap: wrap; gap: 6px; padding: 14px 28px 10px;
+      display: flex; flex-direction: column; gap: 8px; padding: 12px 28px 10px;
       border-bottom: 1px solid var(--border);
     }
+    .tab-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: flex-start; }
     .gtab {
       background: var(--card); border: 1px solid var(--border); color: var(--muted);
       border-radius: 10px; padding: 8px 12px; font-size: 0.72rem; cursor: pointer;
@@ -587,10 +588,11 @@ function renderAll() {
 function buildTabs() {
   const tabs = document.getElementById('gameTabs');
 
-  // Filter shortcuts
   const swissCount = GAMES.filter(g => g.swiss).length;
   const sofiCount  = GAMES.filter(g => g.sofi).length;
-  let html = `
+
+  // Row 1 — filter shortcuts
+  let row1 = `<div class="tab-row">
     <button class="gtab filter-tab${activeTab==='swiss'?' active':''}" onclick="setTab('swiss')">
       <span class="tab-flags">🇨🇭</span>
       <span class="tab-teams">Switzerland</span>
@@ -601,21 +603,25 @@ function buildTabs() {
       <span class="tab-teams">SoFi / LA</span>
       <span class="tab-date">${sofiCount} games</span>
     </button>
-    <div class="tab-sep"></div>
     <button class="gtab${activeTab==='all'?' active':''}" onclick="setTab('all')">
       <span class="tab-flags">⚽</span>
       <span class="tab-teams">All Games</span>
       <span class="tab-date">${GAMES.length} matches</span>
-    </button>`;
+    </button>
+  </div>`;
 
+  // Row 2 — individual games
+  let row2 = '<div class="tab-row">';
   for (const g of GAMES) {
-    html += `<button class="gtab${activeTab===g.id?' active':''}" onclick="setTab('${g.id}')">
+    row2 += `<button class="gtab${activeTab===g.id?' active':''}" onclick="setTab('${g.id}')">
       <span class="tab-flags">${g.flags}</span>
       <span class="tab-teams">${esc(g.teams)}</span>
       <span class="tab-date">${g.date.slice(5).replace('-','/').replace(/^0/,'')} · ${g.sofi?'SoFi':'Away'}</span>
     </button>`;
   }
-  tabs.innerHTML = html;
+  row2 += '</div>';
+
+  tabs.innerHTML = row1 + row2;
 }
 
 function setTab(id) {
