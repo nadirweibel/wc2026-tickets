@@ -150,6 +150,12 @@
     .plat-price-wrap { flex: 1; }
     .plat-price { font-size: 1.05rem; font-weight: 700; }
     .plat-price.monitoring { font-size: 0.75rem; color: var(--muted); font-style: italic; font-weight: 400; }
+    .sg-check-link {
+      font-size: 0.78rem; font-weight: 700; color: #4CAF50;
+      background: rgba(76,175,80,0.12); border: 1px solid rgba(76,175,80,0.3);
+      border-radius: 6px; padding: 4px 10px; text-decoration: none; white-space: nowrap;
+    }
+    .sg-check-link:hover { background: rgba(76,175,80,0.22); }
     .plat-note { font-size: 0.65rem; color: var(--muted); margin-top: 1px; }
     .plat-count {
       font-size: 0.72rem; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
@@ -428,9 +434,14 @@ function renderPlatRow(plat, rows, history) {
     const minSeen = r.min_seen;
     const isLow  = price != null && minSeen != null && price <= minSeen;
     const isDeal = price != null && price < C;
+    // SeatGeek: API returns null prices (DataDome blocks scraping + free-tier API has no pricing).
+    // Show a direct-link button instead so the user can check the live price manually.
+    const isSeatGeek = r.platform === 'SeatGeek';
     const priceStr = price != null
       ? `<span class="plat-price">$${Math.round(price)}</span>`
-      : `<span class="plat-price monitoring">Monitoring…</span>`;
+      : isSeatGeek && r.url
+        ? `<a class="sg-check-link" href="${esc(r.url)}" target="_blank" rel="noopener">Check prices →</a>`
+        : `<span class="plat-price monitoring">Monitoring…</span>`;
     const note = r.price_note || (r.platform === 'StubHub' ? 'all-in' : '');
     const noteStr = note ? `<div class="plat-note">${esc(note)} · checked ${timeAgo(r.last_checked)}</div>` : `<div class="plat-note">checked ${timeAgo(r.last_checked)}</div>`;
     const tags = (isLow ? '<span class="tag-low">★ NEW LOW</span>' : '') + (isDeal && !isLow ? '<span class="tag-deal">DEAL</span>' : '');
