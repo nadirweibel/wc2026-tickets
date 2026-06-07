@@ -1,114 +1,152 @@
 """
-Reddit monitor.
+Reddit scraper using Reddit's public JSON API.
 
-Searches relevant subreddits for new posts mentioning WC2026 tickets.
-Extracts dollar amounts from post titles and bodies; alerts on new posts
-that mention prices below the ceiling (not yet seen in prices.json).
+Reddit serves JSON for any page by appending .json to the URL — no auth,
+no app registration needed. Rate limit is ~60 req/min for unauthenticated
+access, well within our hourly cadence.
 
-Requires a Reddit "script" app — free, no approval needed.
-Create one at reddit.com/prefs/apps → "script" type.
-Set REDDIT_CLIENT_ID and REDDIT_CLIENT_SECRET in GitHub Secrets.
+Monitors r/WorldCup2026Tickets plus several other subs, searching for
+posts that mention ticket prices for Swiss games or SoFi/LA games.
 """
 
-import os
 import re
+import time
+import requests
 from typing import List, Dict
 
-try:
-    import praw
-    _HAS_PRAW = True
-except ImportError:
-    _HAS_PRAW = False
+_HEADERS = {
+    # Reddit requires a descriptive User-Agent for unauthenticated requests.
+    "User-Agent": "wc2026-ticket-checker/1.0 (price monitor; contact via github.com/nadirweibel/wc2026-tickets)",
+    "Accept": "application/json",
+}
 
-# Subreddits most likely to have WC2026 ticket posts or price tips
-_SUBS = [
-    "WorldCup2026Tickets",   # most targeted — dedicated WC2026 ticket sub
+# Subreddits to monitor — checked newest posts + searched
+_MONITOR_SUBS = [
+    "WorldCup2026Tickets",  # most targeted
     "soccertickets",
     "Tickets",
     "FIFA",
     "worldcup",
     "soccer",
-    "LosAngeles",
 ]
 
-# Matches: $200, $1,500, $350.00, "200 each", "face value 250"
+# Search terms run against each subreddit
+_SEARCHES = [
+    "Switzerland FIFA World Cup 2026 ticket",
+    "FIFA World Cup 2026 SoFi ticket",
+    "FIFA World Cup 2026 Inglewood ticket",
+    "FIFA World Cup 2026 Los Angeles ticket",
+]
+
+# Dollar amounts between $30 and $8000 are treated as plausible ticket prices
 _PRICE_RE = re.compile(
-    r'(?:\$\s*|face\s+value\s+\$?\s*)(\d{1,2},\d{3}|\d{2,4})(?:\.\d{2})?(?:\s*/?\s*each)?',
+    r'(?:\$\s*|face\s+value\s+\$?\s*)(\d{1,2},\d{3}|\d{2,4})(?:\.\d{2})?',
     re.IGNORECASE,
 )
-
-# Only treat amounts in this range as plausible ticket prices
-_MIN_PLAUSIBLE = 30
-_MAX_PLAUSIBLE = 8000
+_MIN_P, _MAX_P = 30, 8000
 
 
 def search(query: str) -> List[Dict]:
-    if not _HAS_PRAW:
-        print("[Reddit] praw not installed; skipping.")
+    """
+    Called once per TARGET_SEARCH query by checker.py.
+    On the first query we do the full sweep; subsequent calls are no-ops
+    to avoid redundant requests (results are already deduped by post ID).
+    """
+    # Only do the full sweep on the first query to avoid hitting Reddit 4x
+    if not query.startswith("Switzerland"):
         return []
+    return _sweep()
 
-    client_id = os.environ.get("REDDIT_CLIENT_ID", "")
-    client_secret = os.environ.get("REDDIT_CLIENT_SECRET", "")
-    if not client_id or not client_secret:
-        return []
 
+def _sweep() -> List[Dict]:
     results: List[Dict] = []
     seen_ids: set = set()
 
-    try:
-        reddit = praw.Reddit(
-            client_id=client_id,
-            client_secret=client_secret,
-            user_agent="wc2026-ticket-checker/1.0 (by u/wc2026bot)",
-            ratelimit_seconds=60,
-        )
+    for sub in _MONITOR_SUBS:
+        # 1. Newest posts in the sub
+        posts = _fetch(f"https://www.reddit.com/r/{sub}/new.json", {"limit": 25})
+        _parse_posts(posts, seen_ids, results)
+        time.sleep(0.5)   # polite pacing
 
-        combined = "+".join(_SUBS)
-        sub = reddit.subreddit(combined)
-
-        try:
-            posts = list(sub.search(query, sort="new", time_filter="month", limit=25))
-        except Exception as e:
-            print(f"[Reddit] Search error for '{query}': {e}")
-            return []
-
-        for post in posts:
-            if post.id in seen_ids:
-                continue
-            seen_ids.add(post.id)
-
-            text = f"{post.title} {post.selftext}"
-            prices = _extract_prices(text)
-            if not prices:
-                continue
-
-            min_p = min(prices)
-            results.append({
-                "platform": f"Reddit r/{post.subreddit.display_name}",
-                "event": post.title[:120],
-                "date": "",
-                "venue": "",
-                "url": f"https://reddit.com{post.permalink}",
-                "min_price": min_p,
-                "currency": "USD",
-                "section": post.id,     # reuse section field as a stable unique key
-                "reddit_score": post.score,
-                "reddit_flair": post.link_flair_text or "",
-            })
-
-    except Exception as e:
-        print(f"[Reddit] Connection error: {e}")
+        # 2. Search within the sub for WC2026 ticket terms
+        for q in _SEARCHES:
+            posts = _fetch(
+                f"https://www.reddit.com/r/{sub}/search.json",
+                {"q": q, "sort": "new", "t": "month", "limit": 15, "restrict_sr": 1},
+            )
+            _parse_posts(posts, seen_ids, results)
+            time.sleep(0.5)
 
     return results
 
 
+def _fetch(url: str, params: dict) -> list:
+    try:
+        r = requests.get(url, params=params, headers=_HEADERS, timeout=15)
+        if r.status_code == 429:
+            print(f"[Reddit] Rate limited on {url}; skipping.")
+            return []
+        if r.status_code != 200:
+            print(f"[Reddit] HTTP {r.status_code} for {url}")
+            return []
+        data = r.json()
+        return data.get("data", {}).get("children", [])
+    except Exception as e:
+        print(f"[Reddit] Error fetching {url}: {e}")
+        return []
+
+
+def _parse_posts(children: list, seen_ids: set, results: list) -> None:
+    for child in children:
+        post = child.get("data", {})
+        post_id = post.get("id", "")
+        if not post_id or post_id in seen_ids:
+            continue
+        seen_ids.add(post_id)
+
+        title = post.get("title", "")
+        body  = post.get("selftext", "")
+        text  = f"{title} {body}"
+
+        if not _is_relevant(text):
+            continue
+
+        prices = _extract_prices(text)
+        if not prices:
+            continue
+
+        sub_name = post.get("subreddit", "")
+        results.append({
+            "platform": f"Reddit r/{sub_name}",
+            "event": title[:120],
+            "date": "",
+            "venue": "",
+            "url": f"https://reddit.com{post.get('permalink', '')}",
+            "min_price": min(prices),
+            "currency": "USD",
+            "section": post_id,   # stable unique key in prices.json
+        })
+
+
+def _is_relevant(text: str) -> bool:
+    t = text.lower()
+    has_wc = "world cup" in t or "fifa" in t or "wc2026" in t or "wc 2026" in t
+    has_target = (
+        "switzerland" in t or "swiss" in t
+        or "sofi" in t or "inglewood" in t
+        or "los angeles" in t
+    )
+    has_ticket = any(w in t for w in ("ticket", "seat", "selling", "wtb", "wts", "for sale", "face value"))
+    return has_wc and (has_target or has_ticket)
+
+
 def _extract_prices(text: str) -> List[float]:
-    candidates = []
+    out = []
     for raw in _PRICE_RE.findall(text):
         try:
             val = float(raw.replace(",", ""))
-            if _MIN_PLAUSIBLE <= val <= _MAX_PLAUSIBLE:
-                candidates.append(val)
+            if _MIN_P <= val <= _MAX_P:
+                out.append(val)
         except ValueError:
             pass
-    return candidates
+    return out
