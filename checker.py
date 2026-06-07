@@ -141,6 +141,13 @@ def main() -> None:
             prev_str = f"${prev_min:.0f}" if prev_min else "first seen"
             print(f"  ALERT  {listing['platform']:15s} | {listing['event'][:60]} | ${price:.0f} (was {prev_str})")
 
+        # Preserve extra platform-specific fields (price_note, url_qty2, counts, etc.)
+        extras = {
+            k: listing[k]
+            for k in ("price_note", "url_qty2", "listing_count", "ticket_count",
+                      "base_price", "body", "_tm_event_id", "_vs_id", "_sg_event_id")
+            if listing.get(k) is not None
+        }
         history[key] = {
             "event": listing["event"],
             "platform": listing["platform"],
@@ -151,6 +158,7 @@ def main() -> None:
             "last_price": price,
             "last_checked": now,
             **({"availability": av_status, "av_checked_at": now} if is_reddit else {}),
+            **extras,
         }
 
     save_history(history)
