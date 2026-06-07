@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>WC2026 Ticket Tracker</title>
+  <title>FIFA World Cup 2026 — Ticket Tracker</title>
   <style>
     :root {
       --bg: #08101f;
@@ -105,7 +105,7 @@
     .tag-low  { background: rgba(34,197,94,0.18);  color: var(--green); }
     .tag-deal { background: rgba(240,180,41,0.18); color: var(--yellow); }
 
-    .ev-name { max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .ev-name { max-width: 420px; line-height: 1.4; word-break: break-word; }
 
     .buy {
       display: inline-block; padding: 5px 11px; background: var(--accent);
@@ -191,7 +191,7 @@
   <div style="display:flex;align-items:center;gap:14px">
     <div style="font-size:2.6rem;line-height:1">🏆</div>
     <div>
-      <h1>WC2026 <span>Ticket Tracker</span></h1>
+      <h1>FIFA World Cup 2026 <span>Ticket Tracker</span></h1>
       <div class="meta" id="meta">Loading…</div>
     </div>
     <div style="font-size:2rem;line-height:1;opacity:0.85">🇨🇭</div>
@@ -242,7 +242,7 @@
 
 <script>
 // ── auth gate ─────────────────────────────────────────────────────────────────
-const SITE_PW = 'wc2026';        // ← change this line to set your password
+const SITE_PW = 'Emmin@2007';    // ← change this line to set your password
 const LS_AUTH = 'wc2026_auth_v1';
 
 function isAuthed() { return localStorage.getItem(LS_AUTH) === SITE_PW; }
@@ -415,7 +415,7 @@ function render() {
       <tr class="${cls}">
         <td>${platBadge(r.platform)}</td>
         <td><div class="ev-name" title="${esc(r.event||'')}">
-          ${esc((r.event||'—').slice(0,90))}${tags}${av}
+          ${esc((r.event||'—').slice(0,140))}${tags}${av}
         </div></td>
         <td style="white-space:nowrap;color:var(--muted)">${date}</td>
         <td style="color:var(--muted);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.venue||'—')}</td>
@@ -483,7 +483,7 @@ async function load() {
     const platforms = [...new Set(allRows.map(r=>r.platform.split(' ')[0]))];
 
     document.getElementById('meta').textContent =
-      `${platforms.length} platforms · last check ${timeAgo(lastCheck)} · auto-refreshes every 5 min`;
+      `${platforms.length} platforms · prices last fetched ${timeAgo(lastCheck)} (hourly by server) · page auto-refreshes every 5 min`;
 
     updateSummary();
     updateToolbar();

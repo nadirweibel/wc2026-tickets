@@ -1,127 +1,121 @@
 """
-StubHub scraper.
+StubHub scraper — uses the FIFA WC grouping page JSON-LD.
 
-StubHub's public API requires a partner agreement; no free tier exists.
-We scrape the search-result HTML, which is Next.js-rendered. The page
-embeds its initial state as JSON inside a <script id="__NEXT_DATA__"> tag
-and also emits standard JSON-LD Event markup — we try both.
-
-Will return [] if StubHub blocks the request (Cloudflare challenge, etc.).
+The grouping page (world-cup-tickets/grouping/45410) returns schema.org
+SportsEvent JSON-LD with lowPrice for every event on sale. We paginate
+through up to 10 pages and filter for Switzerland or SoFi Stadium events.
+Works from a residential IP; blocked on GitHub Actions (Akamai 202).
 """
 
 import json
-import re
+import time
 import requests
 from bs4 import BeautifulSoup
-from typing import Dict, List, Optional
+from typing import Dict, List
 
+_GROUPING_URL = "https://www.stubhub.com/world-cup-tickets/grouping/45410/"
 _HEADERS = {
     "User-Agent": (
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
-        "AppleWebKit/537.36 (KHTML, like Gecko) "
-        "Chrome/124.0.0.0 Safari/537.36"
+        "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
     ),
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
     "Accept-Language": "en-US,en;q=0.9",
+    "Accept-Encoding": "gzip, deflate, br",
+    "Connection": "keep-alive",
+    "Upgrade-Insecure-Requests": "1",
+    "Sec-Fetch-Dest": "document",
     "Sec-Fetch-Mode": "navigate",
+    "Sec-Fetch-Site": "none",
+    "Sec-Fetch-User": "?1",
 }
-
-_SEARCH_URL = "https://www.stubhub.com/secure/search"
+_MAX_PAGES = 10
 
 
 def search(query: str) -> List[Dict]:
+    if not query.startswith("World Cup Switzerland"):
+        return []   # run once per cycle
+
     results: List[Dict] = []
-    try:
-        r = requests.get(
-            _SEARCH_URL,
-            params={"q": query},
-            headers=_HEADERS,
-            timeout=20,
-            allow_redirects=True,
-        )
-        if r.status_code != 200:
-            print(f"[StubHub] HTTP {r.status_code} for '{query}'")
-            return results
+    seen: set = set()
 
-        soup = BeautifulSoup(r.text, "lxml")
+    for page in range(1, _MAX_PAGES + 1):
+        page_events = _fetch_page(page)
+        if not page_events:
+            break
 
-        # Path 1: Next.js state blob
-        nd = soup.find("script", {"id": "__NEXT_DATA__"})
-        if nd and nd.string:
-            try:
-                results.extend(_from_next(json.loads(nd.string)))
-            except Exception as e:
-                print(f"[StubHub] __NEXT_DATA__ parse error: {e}")
-
-        # Path 2: JSON-LD Event markup
-        for tag in soup.find_all("script", {"type": "application/ld+json"}):
-            if not tag.string:
+        new_on_page = 0
+        for ev in page_events:
+            name = ev["name"]
+            if "parking" in name.lower():
                 continue
-            try:
-                payload = json.loads(tag.string)
-                items = payload if isinstance(payload, list) else [payload]
-                for item in items:
-                    ev = _from_ld(item)
-                    if ev:
-                        results.append(ev)
-            except Exception:
-                pass
+            if not _is_target(name, ev["venue"]):
+                continue
+            key = f"{name}|{ev['date'][:10]}"
+            if key in seen:
+                continue
+            seen.add(key)
+            new_on_page += 1
+            results.append({
+                "platform": "StubHub",
+                "event": name,
+                "date": ev["date"],
+                "venue": ev["venue"],
+                "url": ev["url"],
+                "min_price": ev["price"],
+                "currency": "USD",
+            })
 
-    except Exception as e:
-        print(f"[StubHub] Request error for '{query}': {e}")
+        time.sleep(0.5)
 
     return results
 
 
-def _from_next(data: dict) -> List[Dict]:
-    out: List[Dict] = []
-    props = data.get("props", {}).get("pageProps", {})
-    # StubHub uses several different keys depending on search vs category page
-    for key in ("events", "searchResults", "results", "items"):
-        for item in props.get(key, []):
-            name = item.get("name") or item.get("title") or ""
-            if not name or not _is_wc(name):
+def _fetch_page(page: int) -> List[Dict]:
+    url = f"{_GROUPING_URL}?page={page}"
+    try:
+        r = requests.get(url, headers=_HEADERS, timeout=20, allow_redirects=True)
+        if r.status_code != 200:
+            print(f"[StubHub] HTTP {r.status_code} page {page}")
+            return []
+
+        soup = BeautifulSoup(r.text, "lxml")
+        events: List[Dict] = []
+
+        for tag in soup.find_all("script", type="application/ld+json"):
+            if not tag.string:
                 continue
-            price = (
-                item.get("minTicketPrice")
-                or item.get("minPrice")
-                or (item.get("ticketInfo") or {}).get("minListPrice")
-            )
-            if price is None:
-                continue
-            out.append({
-                "platform": "StubHub",
-                "event": name,
-                "date": item.get("eventDateLocal") or item.get("date") or "",
-                "venue": item.get("venue") or item.get("venueName") or "",
-                "url": "https://www.stubhub.com" + (item.get("url") or item.get("eventUrl") or ""),
-                "min_price": float(price),
-                "currency": "USD",
-            })
-    return out
+            try:
+                ld = json.loads(tag.string)
+                items = ld.get("@graph", [ld] if isinstance(ld, dict) else ld)
+                for item in items:
+                    if item.get("@type") not in ("SportsEvent", "Event"):
+                        continue
+                    offers = item.get("offers") or {}
+                    low = offers.get("lowPrice") or offers.get("price")
+                    if low is None:
+                        continue
+                    loc = item.get("location") or {}
+                    venue = loc.get("name", "") if isinstance(loc, dict) else ""
+                    events.append({
+                        "name": item.get("name", ""),
+                        "date": item.get("startDate", ""),
+                        "venue": venue,
+                        "url": item.get("url", ""),
+                        "price": float(low),
+                    })
+            except Exception as e:
+                print(f"[StubHub] JSON-LD parse error page {page}: {e}")
+
+        return events
+    except Exception as e:
+        print(f"[StubHub] Request error page {page}: {e}")
+        return []
 
 
-def _from_ld(ld: dict) -> Optional[Dict]:
-    if ld.get("@type") != "Event":
-        return None
-    name = ld.get("name", "")
-    if not _is_wc(name):
-        return None
-    offers = ld.get("offers") or {}
-    price = offers.get("lowPrice") or offers.get("price")
-    if price is None:
-        return None
-    return {
-        "platform": "StubHub",
-        "event": name,
-        "date": ld.get("startDate", ""),
-        "venue": (ld.get("location") or {}).get("name", "") if isinstance(ld.get("location"), dict) else "",
-        "url": ld.get("url", ""),
-        "min_price": float(price),
-        "currency": offers.get("priceCurrency", "USD"),
-    }
-
-
-def _is_wc(name: str) -> bool:
-    n = name.lower()
-    return "world cup" in n or "fifa" in n
+def _is_target(name: str, venue: str) -> bool:
+    n, v = name.lower(), venue.lower()
+    return (
+        "switzerland" in n or "swiss" in n or
+        "sofi" in v or "sofi" in n or "inglewood" in v
+    )

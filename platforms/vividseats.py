@@ -1,120 +1,123 @@
 """
-Vivid Seats scraper.
+Vivid Seats — uses the internal hermes productions API.
 
-Same technique as StubHub: parse the Next.js __NEXT_DATA__ blob and
-JSON-LD Event markup embedded in the search-result HTML.
+https://www.vividseats.com/hermes/api/v1/productions returns real listing
+prices (minPrice, maxPrice) as JSON. No authentication required.
+Runs once per cycle (on "World Cup Switzerland" query).
 """
 
-import json
+import time
 import requests
-from bs4 import BeautifulSoup
-from typing import Dict, List, Optional
+from typing import Dict, List
 
+_BASE = "https://www.vividseats.com/hermes/api/v1/productions"
 _HEADERS = {
     "User-Agent": (
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
-        "AppleWebKit/537.36 (KHTML, like Gecko) "
-        "Chrome/124.0.0.0 Safari/537.36"
+        "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
     ),
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept": "application/json",
+    "Referer": "https://www.vividseats.com",
     "Accept-Language": "en-US,en;q=0.9",
 }
 
-_SEARCH_URL = "https://www.vividseats.com/search"
+_QUERIES = [
+    "switzerland world cup",
+    "sofi stadium world cup",
+    "los angeles world cup 2026",
+]
+
+_SESSION_HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
+    ),
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.9",
+    "Accept-Encoding": "gzip, deflate, br",
+    "Connection": "keep-alive",
+    "Upgrade-Insecure-Requests": "1",
+    "Sec-Fetch-Dest": "document",
+    "Sec-Fetch-Mode": "navigate",
+    "Sec-Fetch-Site": "none",
+    "Sec-Fetch-User": "?1",
+    "Cache-Control": "max-age=0",
+}
+
+
+def _make_session() -> requests.Session:
+    """Visit VividSeats homepage first to acquire real session cookies."""
+    s = requests.Session()
+    s.headers.update(_SESSION_HEADERS)
+    try:
+        s.get("https://www.vividseats.com", timeout=15, allow_redirects=True)
+        time.sleep(1.0)
+    except Exception:
+        pass
+    # Switch to JSON accept for API calls
+    s.headers.update({
+        "Accept": "application/json",
+        "Referer": "https://www.vividseats.com/",
+        "Sec-Fetch-Site": "same-origin",
+        "Sec-Fetch-Mode": "cors",
+        "Sec-Fetch-Dest": "empty",
+    })
+    return s
 
 
 def search(query: str) -> List[Dict]:
+    if not query.startswith("World Cup Switzerland"):
+        return []   # run once per cycle
+
     results: List[Dict] = []
-    try:
-        r = requests.get(
-            _SEARCH_URL,
-            params={"searchTerm": query},
-            headers=_HEADERS,
-            timeout=20,
-            allow_redirects=True,
-        )
-        if r.status_code != 200:
-            print(f"[VividSeats] HTTP {r.status_code} for '{query}'")
-            return results
+    seen: set = set()
+    session = _make_session()
 
-        soup = BeautifulSoup(r.text, "lxml")
-
-        nd = soup.find("script", {"id": "__NEXT_DATA__"})
-        if nd and nd.string:
-            try:
-                results.extend(_from_next(json.loads(nd.string)))
-            except Exception as e:
-                print(f"[VividSeats] __NEXT_DATA__ parse error: {e}")
-
-        for tag in soup.find_all("script", {"type": "application/ld+json"}):
-            if not tag.string:
+    for q in _QUERIES:
+        try:
+            r = session.get(_BASE, params={"query": q}, timeout=15)
+            if "text/html" in r.headers.get("content-type", ""):
+                print(f"[VividSeats] Bot challenge on '{q}' — skipping")
                 continue
-            try:
-                payload = json.loads(tag.string)
-                items = payload if isinstance(payload, list) else [payload]
-                for item in items:
-                    ev = _from_ld(item)
-                    if ev:
-                        results.append(ev)
-            except Exception:
-                pass
+            r.raise_for_status()
+            for item in r.json().get("items", []):
+                name = item.get("name", "")
+                if not name:
+                    continue
+                if "parking" in name.lower():
+                    continue
+                venue_obj = item.get("venue") or {}
+                venue = venue_obj.get("name", "") if isinstance(venue_obj, dict) else ""
+                if not _is_target(name, venue):
+                    continue
 
-    except Exception as e:
-        print(f"[VividSeats] Request error for '{query}': {e}")
+                vid = str(item.get("id", ""))
+                if vid in seen:
+                    continue
+                seen.add(vid)
+
+                min_price = item.get("minPrice")
+                results.append({
+                    "platform": "VividSeats",
+                    "event": name,
+                    "date": (item.get("localDate") or "")[:19],
+                    "venue": venue,
+                    "url": f"https://www.vividseats.com/tickets/production/{vid}",
+                    "min_price": float(min_price) if min_price is not None else None,
+                    "max_price": item.get("maxPrice"),
+                    "currency": "USD",
+                    "_vs_id": vid,
+                })
+        except Exception as e:
+            print(f"[VividSeats] Error ({q}): {e}")
+        time.sleep(0.5)
 
     return results
 
 
-def _from_next(data: dict) -> List[Dict]:
-    out: List[Dict] = []
-    props = data.get("props", {}).get("pageProps", {})
-    for key in ("productions", "events", "searchResults", "results"):
-        for item in props.get(key, []):
-            name = (
-                item.get("name")
-                or item.get("productionName")
-                or item.get("title")
-                or ""
-            )
-            if not name or not _is_wc(name):
-                continue
-            price = item.get("minPrice") or item.get("lowestPrice") or item.get("minTicketPrice")
-            if price is None:
-                continue
-            web_path = item.get("webPath") or item.get("url") or ""
-            out.append({
-                "platform": "VividSeats",
-                "event": name,
-                "date": item.get("localDate") or item.get("eventDate") or item.get("date") or "",
-                "venue": item.get("venueName") or item.get("venue") or "",
-                "url": f"https://www.vividseats.com{web_path}" if web_path.startswith("/") else web_path,
-                "min_price": float(price),
-                "currency": "USD",
-            })
-    return out
-
-
-def _from_ld(ld: dict) -> Optional[Dict]:
-    if ld.get("@type") != "Event":
-        return None
-    name = ld.get("name", "")
-    if not _is_wc(name):
-        return None
-    offers = ld.get("offers") or {}
-    price = offers.get("lowPrice") or offers.get("price")
-    if price is None:
-        return None
-    return {
-        "platform": "VividSeats",
-        "event": name,
-        "date": ld.get("startDate", ""),
-        "venue": (ld.get("location") or {}).get("name", "") if isinstance(ld.get("location"), dict) else "",
-        "url": ld.get("url", ""),
-        "min_price": float(price),
-        "currency": offers.get("priceCurrency", "USD"),
-    }
-
-
-def _is_wc(name: str) -> bool:
-    n = name.lower()
-    return "world cup" in n or "fifa" in n
+def _is_target(name: str, venue: str) -> bool:
+    n, v = name.lower(), venue.lower()
+    return (
+        "switzerland" in n or "swiss" in n or
+        "sofi" in v or "sofi" in n or "inglewood" in v
+    )
