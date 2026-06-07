@@ -23,10 +23,10 @@ LOG_FILE = Path("prices_log.csv")
 # Search terms drive every platform query.
 # Swiss games use the team name; Inglewood games use venue identifiers.
 TARGET_SEARCHES = [
-    "Switzerland FIFA World Cup 2026",
-    "FIFA World Cup 2026 SoFi Stadium",
-    "FIFA World Cup 2026 Inglewood",
-    "FIFA World Cup 2026 Los Angeles",
+    "World Cup Switzerland",        # matches SeatGeek: "Switzerland vs X - World Cup"
+    "World Cup SoFi Stadium",       # SoFi games
+    "World Cup Inglewood",
+    "World Cup Los Angeles 2026",
 ]
 
 

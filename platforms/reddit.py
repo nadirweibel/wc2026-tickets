@@ -52,8 +52,8 @@ def search(query: str) -> List[Dict]:
     On the first query we do the full sweep; subsequent calls are no-ops
     to avoid redundant requests (results are already deduped by post ID).
     """
-    # Only do the full sweep on the first query to avoid hitting Reddit 4x
-    if not query.startswith("Switzerland"):
+    # Only do the full sweep on the first query to avoid redundant requests
+    if not query.startswith("World Cup Switzerland"):
         return []
     return _sweep()
 
