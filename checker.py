@@ -104,8 +104,17 @@ def main() -> None:
         key = make_key(listing)
         prev = history.get(key, {})
 
-        # Always persist monitored events, even with no price yet
+        # Always persist monitored events, even with no price yet.
+        # Preserve last_price from previous run — a null return means "scraper
+        # couldn't reach the platform this cycle" (e.g. Akamai / Cloudflare
+        # blocking GitHub Actions datacenter IPs), NOT "confirmed no listings".
         if price is None:
+            # Carry over platform-specific IDs from listing even on null price
+            null_extras = {
+                k: listing[k]
+                for k in ("_tm_event_id", "_vs_id", "_sg_event_id")
+                if listing.get(k) is not None
+            }
             history[key] = {
                 **prev,
                 "event": listing["event"],
@@ -114,8 +123,9 @@ def main() -> None:
                 "venue": listing.get("venue", ""),
                 "url": listing.get("url", ""),
                 "min_seen": prev.get("min_seen"),
-                "last_price": None,
+                "last_price": prev.get("last_price"),   # keep last known price
                 "last_checked": now,
+                **null_extras,
             }
             continue
 
