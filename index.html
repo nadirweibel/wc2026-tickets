@@ -33,6 +33,19 @@
       cursor: pointer;
     }
     .refresh-btn:hover { background: var(--accent); color: #fff; }
+    .ceiling-control {
+      display: flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+      border-radius: 8px; padding: 6px 12px;
+    }
+    .ceiling-control label { font-size: 0.75rem; color: var(--muted); white-space: nowrap; }
+    .ceiling-input {
+      background: transparent; border: none; border-bottom: 1px solid var(--accent);
+      color: #ffd700; font-size: 1rem; font-weight: 700; width: 64px;
+      text-align: right; outline: none; padding: 0 2px;
+    }
+    .ceiling-input:focus { border-bottom-color: #fff; }
+    .ceiling-note { font-size: 0.65rem; color: var(--muted); margin-top: 2px; }
 
     .summary { display: flex; gap: 14px; padding: 18px 32px; flex-wrap: wrap; }
     .scard {
@@ -123,7 +136,15 @@
     <h1>WC2026 <span>Ticket Tracker</span></h1>
     <div class="meta" id="meta">Loading…</div>
   </div>
-  <button class="refresh-btn" onclick="load()">↻ Refresh</button>
+  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+    <div class="ceiling-control">
+      <label for="ceilingInput">Alert ceiling</label>
+      <span style="color:var(--muted);font-size:0.9rem">$</span>
+      <input id="ceilingInput" class="ceiling-input" type="number" min="0" max="9999" step="25">
+      <div class="ceiling-note">UI only — email uses server setting</div>
+    </div>
+    <button class="refresh-btn" onclick="load()">↻ Refresh</button>
+  </div>
 </header>
 
 <div class="summary" id="summary"></div>
@@ -164,8 +185,24 @@ let currentFilter = 'all';
 let sortCol = 'last_price';
 let sortAsc = true;
 
-// Read CEILING from the meta tag injected by the workflow, or default to 500
-const CEILING = parseFloat(document.querySelector('meta[name=ceiling]')?.content || '500');
+// Ceiling is editable in the UI and persisted in localStorage.
+// The email alert ceiling is separate (set as a GitHub Secret).
+const LS_KEY = 'wc2026_ceiling';
+function getCeiling() { return parseFloat(localStorage.getItem(LS_KEY) || '300'); }
+function setCeiling(v) { localStorage.setItem(LS_KEY, v); }
+
+// Init input from localStorage
+const ceilingInput = document.getElementById('ceilingInput');
+ceilingInput.value = getCeiling();
+ceilingInput.addEventListener('input', () => {
+  const v = parseFloat(ceilingInput.value);
+  if (!isNaN(v) && v >= 0) {
+    setCeiling(v);
+    if (allRows.length) { updateSummary(); render(); }
+  }
+});
+
+function CEILING() { return getCeiling(); }
 
 // ── platform badge ────────────────────────────────────────────────────────────
 function platBadge(p) {
@@ -203,7 +240,7 @@ function matchFilter(row, f) {
   if (f==='sofi')   return ve.includes('sofi')||ve.includes('inglewood')||ev.includes('sofi')||ev.includes('inglewood')||ve.includes('los angeles');
   if (f==='reddit') return pl.includes('reddit');
   if (f==='low')    return row.last_price!=null && row.min_seen!=null && row.last_price<=row.min_seen;
-  if (f==='deal')   return row.last_price!=null && row.last_price<CEILING;
+  if (f==='deal')   return row.last_price!=null && row.last_price<CEILING();
   return true;
 }
 
@@ -230,7 +267,7 @@ function render() {
 
   for (const r of visible) {
     const isLow  = r.last_price!=null && r.min_seen!=null && r.last_price<=r.min_seen;
-    const isDeal = r.last_price!=null && r.last_price<CEILING;
+    const isDeal = r.last_price!=null && r.last_price<CEILING();
     const cls = isLow ? 'is-low' : isDeal ? 'is-deal' : '';
     const tags = (isLow ? '<span class="tag tag-low">★ LOW</span>' : '') +
                  (isDeal&&!isLow ? '<span class="tag tag-deal">DEAL</span>' : '');
@@ -284,6 +321,20 @@ function sortBy(col) {
   render();
 }
 
+// ── summary cards (ceiling-aware, called on load and on ceiling change) ───────
+function updateSummary() {
+  const c = CEILING();
+  const belowCeiling = allRows.filter(r=>r.last_price!=null&&r.last_price<c).length;
+  const lows         = allRows.filter(r=>r.last_price!=null&&r.min_seen!=null&&r.last_price<=r.min_seen).length;
+  const platforms    = [...new Set(allRows.map(r=>r.platform.split(' ')[0]))];
+  document.getElementById('summary').innerHTML = `
+    <div class="scard"><div class="num">${allRows.length}</div><div class="lbl">Listings tracked</div></div>
+    <div class="scard"><div class="num">${belowCeiling}</div><div class="lbl">Below $${Math.round(c)} ceiling</div></div>
+    <div class="scard"><div class="num">${lows}</div><div class="lbl">All-time lows now</div></div>
+    <div class="scard"><div class="num">${platforms.length}</div><div class="lbl">Platforms</div></div>
+  `;
+}
+
 // ── load data ─────────────────────────────────────────────────────────────────
 async function load() {
   try {
@@ -294,21 +345,13 @@ async function load() {
 
     document.getElementById('spinner').style.display='none';
 
-    const belowCeiling = allRows.filter(r=>r.last_price!=null&&r.last_price<CEILING).length;
-    const lows         = allRows.filter(r=>r.last_price!=null&&r.min_seen!=null&&r.last_price<=r.min_seen).length;
-    const lastCheck    = [...allRows.map(r=>r.last_checked).filter(Boolean)].sort().pop();
-    const platforms    = [...new Set(allRows.map(r=>r.platform.split(' ')[0]))];
+    const lastCheck = [...allRows.map(r=>r.last_checked).filter(Boolean)].sort().pop();
+    const platforms = [...new Set(allRows.map(r=>r.platform.split(' ')[0]))];
 
     document.getElementById('meta').textContent =
       `${platforms.length} platforms · last check ${timeAgo(lastCheck)} · auto-refreshes every 5 min`;
 
-    document.getElementById('summary').innerHTML = `
-      <div class="scard"><div class="num">${allRows.length}</div><div class="lbl">Listings tracked</div></div>
-      <div class="scard"><div class="num">${belowCeiling}</div><div class="lbl">Below $${Math.round(CEILING)} ceiling</div></div>
-      <div class="scard"><div class="num">${lows}</div><div class="lbl">All-time lows now</div></div>
-      <div class="scard"><div class="num">${platforms.length}</div><div class="lbl">Platforms</div></div>
-    `;
-
+    updateSummary();
     render();
   } catch(e) {
     document.getElementById('spinner').outerHTML =
