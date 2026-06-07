@@ -6,137 +6,20 @@
   <title>FIFA World Cup 2026 — Ticket Tracker</title>
   <style>
     :root {
-      --bg: #08101f;
-      --card: #0f1c33;
+      --bg:     #08101f;
+      --card:   #0f1c33;
+      --card2:  #0d1a2e;
       --border: #1c2e4a;
-      --text: #e4ecf7;
-      --muted: #7a93b5;
+      --text:   #e4ecf7;
+      --muted:  #7a93b5;
       --accent: #1a6fbe;
-      --green: #22c55e;
-      --yellow: #f0b429;
+      --green:  #22c55e;
+      --yellow: #ffd700;
+      --orange: #f97316;
+      --red:    #f87171;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
-
-    header {
-      background: linear-gradient(135deg, #002b6b 0%, #001435 100%);
-      padding: 22px 32px 20px;
-      border-bottom: 2px solid #1a6fbe;
-      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
-    }
-    header h1 { font-size: 1.45rem; font-weight: 800; letter-spacing: -0.4px; }
-    header h1 span { color: #ffd700; }
-    .meta { font-size: 0.78rem; color: #7aaef8; margin-top: 4px; }
-    .refresh-btn {
-      background: rgba(26,111,190,0.25); border: 1px solid var(--accent);
-      color: #7aaef8; border-radius: 6px; padding: 6px 14px; font-size: 0.78rem;
-      cursor: pointer;
-    }
-    .refresh-btn:hover { background: var(--accent); color: #fff; }
-    .ceiling-control {
-      display: flex; align-items: center; gap: 8px;
-      background: rgba(255,255,255,0.04); border: 1px solid var(--border);
-      border-radius: 8px; padding: 6px 12px;
-    }
-    .ceiling-control label { font-size: 0.75rem; color: var(--muted); white-space: nowrap; }
-    .ceiling-input {
-      background: transparent; border: none; border-bottom: 1px solid var(--accent);
-      color: #ffd700; font-size: 1rem; font-weight: 700; width: 64px;
-      text-align: right; outline: none; padding: 0 2px;
-    }
-    .ceiling-input:focus { border-bottom-color: #fff; }
-    .ceiling-note { font-size: 0.65rem; color: var(--muted); margin-top: 2px; }
-
-    .summary { display: flex; gap: 14px; padding: 18px 32px; flex-wrap: wrap; }
-    .scard {
-      background: var(--card); border: 1px solid var(--border); border-radius: 10px;
-      padding: 14px 20px; min-width: 130px;
-    }
-    .scard .num { font-size: 1.9rem; font-weight: 800; color: #ffd700; }
-    .scard .lbl { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; margin-top: 3px; }
-
-    .toolbar { padding: 0 32px 14px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-    .filter-btn {
-      background: var(--card); border: 1px solid var(--border); color: var(--muted);
-      border-radius: 20px; padding: 6px 14px; font-size: 0.8rem; cursor: pointer;
-    }
-    .filter-btn.active, .filter-btn:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
-    .search-box {
-      margin-left: auto; background: var(--card); border: 1px solid var(--border);
-      color: var(--text); border-radius: 20px; padding: 6px 14px; font-size: 0.8rem;
-      outline: none; width: 200px;
-    }
-    .search-box:focus { border-color: var(--accent); }
-
-    .table-wrap { overflow-x: auto; padding: 0 32px 48px; }
-    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-    th {
-      background: var(--card); color: var(--muted); text-transform: uppercase;
-      font-size: 0.68rem; letter-spacing: 0.7px; padding: 10px 12px;
-      text-align: left; border-bottom: 1px solid var(--border);
-      cursor: pointer; user-select: none; white-space: nowrap;
-    }
-    th:hover { color: var(--text); }
-    th .sort-arrow { opacity: 0.4; margin-left: 3px; }
-    th.active .sort-arrow { opacity: 1; color: #ffd700; }
-    td { padding: 11px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
-    tr:hover td { background: rgba(26,111,190,0.07); }
-    tr.is-low  td:first-child { border-left: 3px solid var(--green); }
-    tr.is-deal td:first-child { border-left: 3px solid var(--yellow); }
-
-    .plat {
-      display: inline-block; padding: 2px 7px; border-radius: 4px;
-      font-size: 0.68rem; font-weight: 700; letter-spacing: 0.4px; white-space: nowrap;
-    }
-    .plat-tm     { background:#162a55; color:#6fa8ff; }
-    .plat-sg     { background:#0e2e1a; color:#4ade80; }
-    .plat-sh     { background:#2e1010; color:#f87171; }
-    .plat-vs     { background:#2e2210; color:#fbbf24; }
-    .plat-reddit { background:#2a1205; color:#fb923c; }
-    .plat-fifa   { background:#101530; color:#a5b4fc; }
-
-    .price-main { font-size: 1.05rem; font-weight: 700; }
-    .price-best { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
-
-    .tag {
-      display: inline-block; padding: 1px 5px; border-radius: 3px;
-      font-size: 0.62rem; font-weight: 800; vertical-align: middle; margin-left: 4px;
-    }
-    .tag-low  { background: rgba(34,197,94,0.18);  color: var(--green); }
-    .tag-deal { background: rgba(240,180,41,0.18); color: var(--yellow); }
-
-    .ev-name { max-width: 420px; line-height: 1.4; word-break: break-word; }
-
-    .buy {
-      display: inline-block; padding: 5px 11px; background: var(--accent);
-      color: #fff; border-radius: 6px; text-decoration: none;
-      font-size: 0.75rem; font-weight: 600; white-space: nowrap;
-    }
-    .buy:hover { background: #1d7fd4; }
-
-    .dismiss-btn {
-      background: none; border: none; color: var(--muted);
-      cursor: pointer; font-size: 0.85rem; padding: 2px 5px; border-radius: 4px;
-      opacity: 0.45; line-height: 1; margin-left: 4px; vertical-align: middle;
-    }
-    .dismiss-btn:hover { color: #f87171; opacity: 1; }
-    tr.dismissed td { opacity: 0.28; text-decoration: line-through; }
-    tr.dismissed .actions-cell { text-decoration: none !important; opacity: 1 !important; }
-    .av-badge {
-      display: inline-block; padding: 1px 5px; border-radius: 3px;
-      font-size: 0.62rem; font-weight: 800; vertical-align: middle; margin-left: 4px;
-    }
-    .av-sold      { background: rgba(248,113,113,0.18); color: #f87171; }
-    .av-available { background: rgba(34,197,94,0.18);   color: var(--green); }
-    .av-uncertain { background: rgba(122,147,181,0.18); color: var(--muted); }
-
-    .empty { text-align: center; padding: 60px; color: var(--muted); }
-    .spinner {
-      width: 32px; height: 32px; border: 3px solid var(--border);
-      border-top-color: var(--accent); border-radius: 50%;
-      animation: spin 0.75s linear infinite; margin: 60px auto;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
+    body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; }
 
     /* ── auth overlay ── */
     #auth-overlay {
@@ -146,8 +29,7 @@
     }
     .auth-box {
       background: var(--card); border: 1px solid var(--border);
-      border-radius: 16px; padding: 40px 48px; text-align: center;
-      max-width: 380px; width: 90%;
+      border-radius: 16px; padding: 40px 48px; text-align: center; max-width: 380px; width: 90%;
     }
     .auth-box h2 { font-size: 1.3rem; font-weight: 800; margin-bottom: 6px; }
     .auth-box p  { font-size: 0.8rem; color: var(--muted); margin-bottom: 24px; line-height: 1.5; }
@@ -159,26 +41,179 @@
     .auth-input:focus { border-color: var(--accent); }
     .auth-btn {
       width: 100%; background: var(--accent); color: #fff; border: none;
-      border-radius: 8px; padding: 11px; font-size: 0.9rem; font-weight: 700;
-      cursor: pointer; margin-bottom: 8px;
+      border-radius: 8px; padding: 11px; font-size: 0.9rem; font-weight: 700; cursor: pointer;
     }
     .auth-btn:hover { background: #1d7fd4; }
-    .auth-error { font-size: 0.75rem; color: #f87171; min-height: 18px; margin-top: 4px; }
+    .auth-error { font-size: 0.75rem; color: var(--red); min-height: 18px; margin-top: 4px; }
 
-    @media (max-width: 700px) {
-      header, .summary, .toolbar, .table-wrap { padding-left: 14px; padding-right: 14px; }
-      .search-box { width: 140px; }
-      .ev-name { max-width: 160px; }
+    /* ── header ── */
+    header {
+      background: linear-gradient(135deg, #002b6b 0%, #001435 100%);
+      padding: 18px 28px 16px;
+      border-bottom: 2px solid #1a6fbe;
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+    }
+    .header-left { display: flex; align-items: center; gap: 14px; }
+    header h1 { font-size: 1.35rem; font-weight: 800; letter-spacing: -0.3px; }
+    header h1 span { color: var(--yellow); }
+    .meta { font-size: 0.74rem; color: #7aaef8; margin-top: 3px; }
+    .header-controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .ceiling-control {
+      display: flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+      border-radius: 8px; padding: 6px 12px;
+    }
+    .ceiling-control label { font-size: 0.72rem; color: var(--muted); white-space: nowrap; }
+    .ceiling-input {
+      background: transparent; border: none; border-bottom: 1px solid var(--accent);
+      color: var(--yellow); font-size: 0.95rem; font-weight: 700; width: 58px;
+      text-align: right; outline: none; padding: 0 2px;
+    }
+    .refresh-btn {
+      background: rgba(26,111,190,0.25); border: 1px solid var(--accent);
+      color: #7aaef8; border-radius: 6px; padding: 6px 14px; font-size: 0.78rem; cursor: pointer;
+    }
+    .refresh-btn:hover { background: var(--accent); color: #fff; }
+
+    /* ── summary cards ── */
+    .summary { display: flex; gap: 12px; padding: 16px 28px; flex-wrap: wrap; }
+    .scard {
+      background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+      padding: 12px 18px; min-width: 120px;
+    }
+    .scard .num { font-size: 1.7rem; font-weight: 800; color: var(--yellow); }
+    .scard .lbl { font-size: 0.68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+
+    /* ── game tabs ── */
+    .game-tabs {
+      display: flex; flex-wrap: wrap; gap: 6px; padding: 14px 28px 10px;
+      border-bottom: 1px solid var(--border);
+    }
+    .gtab {
+      background: var(--card); border: 1px solid var(--border); color: var(--muted);
+      border-radius: 10px; padding: 8px 12px; font-size: 0.72rem; cursor: pointer;
+      display: flex; flex-direction: column; align-items: center; gap: 1px;
+      min-width: 90px; transition: background 0.15s;
+    }
+    .gtab:hover { background: rgba(26,111,190,0.2); border-color: var(--accent); }
+    .gtab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .gtab .tab-flags { font-size: 1.05rem; line-height: 1; }
+    .gtab .tab-teams { font-weight: 700; color: inherit; font-size: 0.71rem; text-align: center; line-height: 1.2; }
+    .gtab .tab-date  { font-size: 0.64rem; color: var(--muted); }
+    .gtab.active .tab-date { color: rgba(255,255,255,0.65); }
+    .gtab.active .tab-teams { color: #fff; }
+
+    /* ── game panels ── */
+    #game-panels { padding: 20px 28px 60px; }
+    .game-panel { display: none; }
+    .game-panel.active { display: block; }
+
+    .game-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 14px; overflow: hidden; margin-bottom: 24px;
+    }
+    .game-card-header {
+      background: linear-gradient(135deg, #001a40 0%, #002b6b 100%);
+      padding: 18px 24px; display: flex; align-items: center; gap: 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .game-flags { font-size: 2.2rem; line-height: 1; letter-spacing: -2px; }
+    .game-info h2 { font-size: 1.2rem; font-weight: 800; }
+    .game-badge {
+      display: inline-block; font-size: 0.62rem; font-weight: 700; padding: 2px 7px;
+      border-radius: 4px; background: rgba(255,215,0,0.15); color: var(--yellow);
+      letter-spacing: 0.5px; margin-right: 6px; vertical-align: middle;
+    }
+    .game-meta { font-size: 0.75rem; color: rgba(255,255,255,0.55); margin-top: 5px; line-height: 1.5; }
+
+    /* ── platform rows ── */
+    .platform-section { padding: 6px 0; }
+    .platform-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 24px; border-bottom: 1px solid var(--border);
+      transition: background 0.1s;
+    }
+    .platform-row:last-child { border-bottom: none; }
+    .platform-row:hover { background: rgba(26,111,190,0.06); }
+    .plat-logo {
+      width: 22px; height: 22px; border-radius: 5px; object-fit: contain;
+      background: rgba(255,255,255,0.06); flex-shrink: 0;
+    }
+    .plat-name { font-size: 0.78rem; font-weight: 600; color: var(--text); min-width: 96px; }
+    .plat-price-wrap { flex: 1; }
+    .plat-price { font-size: 1.05rem; font-weight: 700; }
+    .plat-price.monitoring { font-size: 0.75rem; color: var(--muted); font-style: italic; font-weight: 400; }
+    .plat-note { font-size: 0.65rem; color: var(--muted); margin-top: 1px; }
+    .plat-count { font-size: 0.72rem; color: var(--muted); min-width: 80px; text-align: right; }
+    .plat-tags { display: flex; gap: 4px; flex-shrink: 0; }
+    .tag-low  { display:inline-block; padding:1px 5px; border-radius:3px; font-size:0.6rem; font-weight:800; background:rgba(34,197,94,0.18); color:var(--green); }
+    .tag-deal { display:inline-block; padding:1px 5px; border-radius:3px; font-size:0.6rem; font-weight:800; background:rgba(255,215,0,0.15); color:var(--yellow); }
+    .buy {
+      display: inline-block; padding: 5px 12px; background: var(--accent);
+      color: #fff; border-radius: 6px; text-decoration: none; font-size: 0.72rem;
+      font-weight: 600; white-space: nowrap; flex-shrink: 0;
+    }
+    .buy:hover { background: #1d7fd4; }
+
+    /* ── reddit section ── */
+    .reddit-section { border-top: 1px solid var(--border); padding: 14px 24px 18px; }
+    .reddit-section h3 {
+      font-size: 0.7rem; color: var(--muted); text-transform: uppercase;
+      letter-spacing: 0.6px; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;
+    }
+    .reddit-section h3 img { width: 14px; height: 14px; border-radius: 3px; }
+    .reddit-empty { font-size: 0.75rem; color: var(--muted); font-style: italic; }
+    .reddit-post {
+      background: rgba(249,115,22,0.06); border: 1px solid rgba(249,115,22,0.2);
+      border-radius: 9px; padding: 11px 14px; margin-bottom: 8px;
+    }
+    .reddit-post.dismissed { opacity: 0.3; }
+    .reddit-post-header { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 5px; }
+    .reddit-post-title { font-weight: 600; font-size: 0.82rem; line-height: 1.35; flex: 1; }
+    .reddit-post-meta { font-size: 0.68rem; color: var(--muted); margin-bottom: 5px; display: flex; gap: 10px; flex-wrap: wrap; }
+    .reddit-post-body { font-size: 0.76rem; color: rgba(228,236,247,0.75); line-height: 1.45; }
+    .reddit-price { font-weight: 700; color: var(--yellow); font-size: 0.85rem; }
+    .av-badge {
+      display: inline-block; padding: 1px 5px; border-radius: 3px;
+      font-size: 0.6rem; font-weight: 800; vertical-align: middle;
+    }
+    .av-sold      { background: rgba(248,113,113,0.18); color: var(--red); }
+    .av-available { background: rgba(34,197,94,0.18);   color: var(--green); }
+    .av-uncertain { background: rgba(122,147,181,0.18); color: var(--muted); }
+    .dismiss-btn {
+      background: none; border: none; color: var(--muted);
+      cursor: pointer; font-size: 0.85rem; padding: 0 4px; opacity: 0.45; flex-shrink: 0;
+    }
+    .dismiss-btn:hover { color: var(--red); opacity: 1; }
+
+    /* ── no-listings placeholder ── */
+    .no-data { font-size: 0.8rem; color: var(--muted); padding: 14px 24px; font-style: italic; }
+
+    /* ── spinner / error ── */
+    .spinner {
+      width: 32px; height: 32px; border: 3px solid var(--border);
+      border-top-color: var(--accent); border-radius: 50%;
+      animation: spin 0.75s linear infinite; margin: 60px auto;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .error-msg { text-align: center; padding: 60px; color: var(--red); }
+
+    @media (max-width: 640px) {
+      header, .summary, .game-tabs, #game-panels { padding-left: 14px; padding-right: 14px; }
+      .game-flags { font-size: 1.6rem; }
+      .platform-row { flex-wrap: wrap; gap: 8px; }
+      .plat-count { text-align: left; }
     }
   </style>
 </head>
 <body>
 
+<!-- ── Auth overlay ── -->
 <div id="auth-overlay">
   <div class="auth-box">
     <div style="font-size:2.8rem;margin-bottom:14px">🏆⚽🇨🇭</div>
-    <h2>WC2026 Ticket Tracker</h2>
-    <p>Private dashboard<br>Enter password to continue</p>
+    <h2>FIFA WC 2026 Ticket Tracker</h2>
+    <p>Private dashboard — enter password to continue</p>
     <form id="auth-form">
       <input id="auth-input" class="auth-input" type="password" placeholder="Password" autocomplete="current-password">
       <button type="submit" class="auth-btn">Enter →</button>
@@ -187,66 +222,43 @@
   </div>
 </div>
 
+<!-- ── Header ── -->
 <header>
-  <div style="display:flex;align-items:center;gap:14px">
-    <div style="font-size:2.6rem;line-height:1">🏆</div>
+  <div class="header-left">
+    <div style="font-size:2.4rem;line-height:1">🏆</div>
     <div>
       <h1>FIFA World Cup 2026 <span>Ticket Tracker</span></h1>
       <div class="meta" id="meta">Loading…</div>
     </div>
     <div style="font-size:2rem;line-height:1;opacity:0.85">🇨🇭</div>
   </div>
-  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+  <div class="header-controls">
     <div class="ceiling-control">
       <label for="ceilingInput">Alert ceiling</label>
-      <span style="color:var(--muted);font-size:0.9rem">$</span>
+      <span style="color:var(--muted);font-size:0.85rem">$</span>
       <input id="ceilingInput" class="ceiling-input" type="number" min="0" max="9999" step="25">
-      <div class="ceiling-note">UI only — email uses server setting</div>
+      <span style="font-size:0.62rem;color:var(--muted)">server-side</span>
     </div>
     <button class="refresh-btn" onclick="load()">↻ Refresh</button>
   </div>
 </header>
 
+<!-- ── Summary ── -->
 <div class="summary" id="summary"></div>
 
-<div class="toolbar">
-  <button class="filter-btn active" onclick="setFilter('all',this)">All</button>
-  <button class="filter-btn" onclick="setFilter('swiss',this)">🇨🇭 Switzerland</button>
-  <button class="filter-btn" onclick="setFilter('sofi',this)">🏟️ SoFi / LA</button>
-  <button class="filter-btn" onclick="setFilter('reddit',this)">Reddit</button>
-  <button class="filter-btn" onclick="setFilter('low',this)">⭐ All-time lows</button>
-  <button class="filter-btn" onclick="setFilter('deal',this)">Below ceiling</button>
-  <button class="filter-btn" id="dismissedBtn" onclick="toggleDismissed()" style="display:none">Show dismissed (0)</button>
-  <input class="search-box" id="searchBox" placeholder="Search…" oninput="render()">
-</div>
+<!-- ── Game tabs ── -->
+<div class="game-tabs" id="gameTabs"></div>
 
-<div class="table-wrap">
+<!-- ── Spinner / panels ── -->
+<div id="game-panels">
   <div class="spinner" id="spinner"></div>
-  <table id="tbl" style="display:none">
-    <thead>
-      <tr>
-        <th onclick="sortBy('platform')">Platform <span class="sort-arrow">↕</span></th>
-        <th onclick="sortBy('event')">Event <span class="sort-arrow">↕</span></th>
-        <th onclick="sortBy('date')">Date <span class="sort-arrow">↕</span></th>
-        <th>Venue</th>
-        <th onclick="sortBy('last_price')" class="active">Current $ <span class="sort-arrow">↑</span></th>
-        <th onclick="sortBy('min_seen')">Best Seen <span class="sort-arrow">↕</span></th>
-        <th onclick="sortBy('last_checked')">Checked <span class="sort-arrow">↕</span></th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody id="tbody"></tbody>
-  </table>
-  <div class="empty" id="empty" style="display:none">No listings match.</div>
 </div>
 
 <script>
-// ── auth gate ─────────────────────────────────────────────────────────────────
-const SITE_PW = 'Emmin@2007';    // ← change this line to set your password
+// ── Auth ──────────────────────────────────────────────────────────────────────
+const SITE_PW = 'Emmin@2007';
 const LS_AUTH = 'wc2026_auth_v1';
-
 function isAuthed() { return localStorage.getItem(LS_AUTH) === SITE_PW; }
-
 document.getElementById('auth-form').addEventListener('submit', e => {
   e.preventDefault();
   const pw = document.getElementById('auth-input').value;
@@ -261,80 +273,59 @@ document.getElementById('auth-form').addEventListener('submit', e => {
   }
 });
 
-let allRows = [];
-let currentFilter = 'all';
-let sortCol = 'last_price';
-let sortAsc = true;
-
-// Ceiling is editable in the UI and persisted in localStorage.
-// The email alert ceiling is separate (set as a GitHub Secret).
-const LS_KEY = 'wc2026_ceiling';
-function getCeiling() { return parseFloat(localStorage.getItem(LS_KEY) || '300'); }
-function setCeiling(v) { localStorage.setItem(LS_KEY, v); }
-
-// Init input from localStorage
+// ── Ceiling ───────────────────────────────────────────────────────────────────
+const LS_CEILING = 'wc2026_ceiling';
+function getCeiling() { return parseFloat(localStorage.getItem(LS_CEILING) || '300'); }
+function setCeiling(v) { localStorage.setItem(LS_CEILING, v); }
 const ceilingInput = document.getElementById('ceilingInput');
 ceilingInput.value = getCeiling();
 ceilingInput.addEventListener('input', () => {
   const v = parseFloat(ceilingInput.value);
-  if (!isNaN(v) && v >= 0) {
-    setCeiling(v);
-    if (allRows.length) { updateSummary(); render(); }
-  }
+  if (!isNaN(v) && v >= 0) { setCeiling(v); renderAll(); }
 });
 
-function CEILING() { return getCeiling(); }
-
-// ── dismiss / restore ────────────────────────────────────────────────────────
-const LS_DISMISSED_KEY = 'wc2026_dismissed';
+// ── Dismiss ───────────────────────────────────────────────────────────────────
+const LS_DISMISSED = 'wc2026_dismissed';
 function getDismissed() {
-  try { return new Set(JSON.parse(localStorage.getItem(LS_DISMISSED_KEY) || '[]')); }
+  try { return new Set(JSON.parse(localStorage.getItem(LS_DISMISSED) || '[]')); }
   catch { return new Set(); }
 }
 function dismiss(key) {
   const s = getDismissed(); s.add(key);
-  localStorage.setItem(LS_DISMISSED_KEY, JSON.stringify([...s]));
-  render(); updateToolbar();
-}
-function restore(key) {
-  const s = getDismissed(); s.delete(key);
-  localStorage.setItem(LS_DISMISSED_KEY, JSON.stringify([...s]));
-  render(); updateToolbar();
-}
-let showDismissed = false;
-function toggleDismissed() {
-  showDismissed = !showDismissed;
-  updateToolbar(); render();
-}
-function updateToolbar() {
-  const n = getDismissed().size;
-  const btn = document.getElementById('dismissedBtn');
-  if (!btn) return;
-  btn.textContent = showDismissed ? `Hide dismissed (${n})` : `Show dismissed (${n})`;
-  btn.style.display = n === 0 ? 'none' : '';
+  localStorage.setItem(LS_DISMISSED, JSON.stringify([...s]));
+  renderAll();
 }
 
-// ── availability badge (Reddit only) ─────────────────────────────────────────
-function avBadge(r) {
-  if (!r.platform.toLowerCase().includes('reddit')) return '';
-  const av = r.availability || '';
-  if (av === 'sold')      return '<span class="av-badge av-sold">SOLD</span>';
-  if (av === 'available') return '<span class="av-badge av-available">LIVE</span>';
-  return '<span class="av-badge av-uncertain">?</span>';
+// ── Game definitions ──────────────────────────────────────────────────────────
+const GAMES = [
+  { id:'m4',  num:4,  teams:'USA vs Paraguay',      flags:'🇺🇸🇵🇾', date:'2026-06-12', time:'6:00 PM PT', venue:'SoFi Stadium',    city:'Inglewood, CA',  group:'Group D',      sofi:true,  swiss:false, pats:['paraguay','match 4'] },
+  { id:'m8',  num:8,  teams:'Qatar vs Switzerland', flags:'🇶🇦🇨🇭', date:'2026-06-13', time:'12:00 PM PT',venue:"Levi's Stadium",  city:'Santa Clara, CA', group:'Group B',      sofi:false, swiss:true,  pats:['qatar','match 8'] },
+  { id:'m15', num:15, teams:'Iran vs New Zealand',  flags:'🇮🇷🇳🇿', date:'2026-06-15', time:'3:00 PM PT', venue:'SoFi Stadium',    city:'Inglewood, CA',  group:'Group G',      sofi:true,  swiss:false, pats:['new zealand','match 15','june 15'] },
+  { id:'m26', num:26, teams:'Switzerland vs Bosnia',flags:'🇨🇭🇧🇦', date:'2026-06-18', time:'3:00 PM PT', venue:'SoFi Stadium',    city:'Inglewood, CA',  group:'Group B',      sofi:true,  swiss:true,  pats:['bosnia','match 26','m26'] },
+  { id:'m39', num:39, teams:'Belgium vs Iran',      flags:'🇧🇪🇮🇷', date:'2026-06-21', time:'6:00 PM PT', venue:'SoFi Stadium',    city:'Inglewood, CA',  group:'Group G',      sofi:true,  swiss:false, pats:['belgium','match 39'] },
+  { id:'m51', num:51, teams:'Canada vs Switzerland',flags:'🇨🇦🇨🇭', date:'2026-06-24', time:'3:00 PM PT', venue:'BC Place Stadium',city:'Vancouver, BC',   group:'Group B',      sofi:false, swiss:true,  pats:['canada','match 51'] },
+  { id:'m59', num:59, teams:'USA vs Turkey',        flags:'🇺🇸🇹🇷', date:'2026-06-25', time:'6:00 PM PT', venue:'SoFi Stadium',    city:'Inglewood, CA',  group:'Group D',      sofi:true,  swiss:false, pats:['turkey','match 59'] },
+  { id:'m73', num:73, teams:'R32 (2A vs 2B)',       flags:'🏆',     date:'2026-06-28', time:'TBD',        venue:'SoFi Stadium',    city:'Inglewood, CA',  group:'Round of 32',  sofi:true,  swiss:false, pats:['match 73','2a vs'] },
+  { id:'m84', num:84, teams:'R32 (1H vs 2J)',       flags:'🏆',     date:'2026-07-02', time:'TBD',        venue:'SoFi Stadium',    city:'Inglewood, CA',  group:'Round of 32',  sofi:true,  swiss:false, pats:['match 84','1h vs'] },
+  { id:'m98', num:98, teams:'Quarterfinal',         flags:'🏆🏆',   date:'2026-07-10', time:'TBD',        venue:'SoFi Stadium',    city:'Inglewood, CA',  group:'Quarterfinal', sofi:true,  swiss:false, pats:['match 98','quarterfinal','quarter-final','w93','w94'] },
+];
+
+// ── Platform metadata ─────────────────────────────────────────────────────────
+const PLATFORMS = [
+  { key:'Ticketmaster', label:'Ticketmaster', domain:'ticketmaster.com' },
+  { key:'SeatGeek',     label:'SeatGeek',     domain:'seatgeek.com' },
+  { key:'StubHub',      label:'StubHub',      domain:'stubhub.com' },
+  { key:'VividSeats',   label:'Vivid Seats',  domain:'vividseats.com' },
+  { key:'FIFA',         label:'FIFA Official', domain:'fifa.com' },
+];
+function platLogo(domain) {
+  return `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
 }
 
-// ── platform badge ────────────────────────────────────────────────────────────
-function platBadge(p) {
-  if (p.startsWith('Ticketmaster')) return '<span class="plat plat-tm">TM</span>';
-  if (p.startsWith('SeatGeek'))     return '<span class="plat plat-sg">SG</span>';
-  if (p.startsWith('StubHub'))      return '<span class="plat plat-sh">SH</span>';
-  if (p.startsWith('VividSeats'))   return '<span class="plat plat-vs">VS</span>';
-  if (p.toLowerCase().includes('reddit')) return '<span class="plat plat-reddit">Reddit</span>';
-  if (p.startsWith('FIFA'))         return '<span class="plat plat-fifa">FIFA</span>';
-  return `<span class="plat plat-tm">${esc(p.slice(0,6))}</span>`;
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
-
-// ── helpers ───────────────────────────────────────────────────────────────────
 function timeAgo(iso) {
   if (!iso) return '—';
   const d = (Date.now() - new Date(iso)) / 1000;
@@ -343,167 +334,267 @@ function timeAgo(iso) {
   if (d < 86400) return `${Math.round(d/3600)}h ago`;
   return `${Math.round(d/86400)}d ago`;
 }
-function esc(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-function matchText(row, q) {
-  const haystack = `${row.event} ${row.platform} ${row.venue} ${row.date}`.toLowerCase();
-  return haystack.includes(q);
-}
-function matchFilter(row, f) {
-  const ev = (row.event||'').toLowerCase();
-  const pl = (row.platform||'').toLowerCase();
-  const ve = (row.venue||'').toLowerCase();
-  if (f==='all')    return true;
-  if (f==='swiss')  return ev.includes('switzerland') || ev.includes('swiss');
-  if (f==='sofi')   return ve.includes('sofi')||ve.includes('inglewood')||ev.includes('sofi')||ev.includes('inglewood')||ve.includes('los angeles');
-  if (f==='reddit') return pl.includes('reddit');
-  if (f==='low')    return row.last_price!=null && row.min_seen!=null && row.last_price<=row.min_seen;
-  if (f==='deal')   return row.last_price!=null && row.last_price<CEILING();
-  return true;
+function fmtDate(iso) {
+  if (!iso) return '—';
+  try {
+    const d = new Date(iso);
+    return d.toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric', year:'numeric' });
+  } catch { return iso.slice(0,10); }
 }
 
-// ── render ────────────────────────────────────────────────────────────────────
-function render() {
-  const q = document.getElementById('searchBox').value.toLowerCase().trim();
+// ── Matching rows to games ────────────────────────────────────────────────────
+function rowsForGame(allRows, game) {
+  return allRows.filter(row => {
+    const text = `${row.event||''} ${row.venue||''} ${row.body||''}`.toLowerCase();
+    if (game.pats.some(p => text.includes(p.toLowerCase()))) return true;
+    // Generic "Switzerland" reddit post that doesn't match any specific game pattern
+    if (game.swiss && row.platform.toLowerCase().includes('reddit')) {
+      const hasSwiss = text.includes('switzerland') || text.includes('swiss');
+      if (hasSwiss) {
+        const matchesOtherSwissGame = GAMES.some(g =>
+          g !== game && g.swiss && g.pats.some(p => text.includes(p.toLowerCase()))
+        );
+        if (!matchesOtherSwissGame) return true;
+      }
+    }
+    return false;
+  });
+}
+
+// ── Availability badge ────────────────────────────────────────────────────────
+function avBadge(row) {
+  if (!row.platform.toLowerCase().includes('reddit')) return '';
+  const av = row.availability || '';
+  if (av === 'sold')      return '<span class="av-badge av-sold">SOLD</span>';
+  if (av === 'available') return '<span class="av-badge av-available">LIVE</span>';
+  return '<span class="av-badge av-uncertain">?</span>';
+}
+
+// ── Render one platform row ───────────────────────────────────────────────────
+function renderPlatRow(plat, rows, history) {
+  // Find best (lowest current price) entry for this platform+game combination
+  const matching = rows.filter(r => r.platform.startsWith(plat.key) && !r.platform.toLowerCase().includes('reddit'));
+  const logo = `<img class="plat-logo" src="${platLogo(plat.domain)}" alt="${esc(plat.label)}" onerror="this.style.display='none'">`;
+
+  if (!matching.length) {
+    return `<div class="platform-row">
+      ${logo}
+      <span class="plat-name">${esc(plat.label)}</span>
+      <div class="plat-price-wrap"><span class="plat-price monitoring">No data</span></div>
+    </div>`;
+  }
+
+  const C = getCeiling();
+  let html = '';
+  for (const r of matching) {
+    const price  = r.last_price;
+    const minSeen = r.min_seen;
+    const isLow  = price != null && minSeen != null && price <= minSeen;
+    const isDeal = price != null && price < C;
+    const priceStr = price != null
+      ? `<span class="plat-price">$${Math.round(price)}</span>`
+      : `<span class="plat-price monitoring">Monitoring…</span>`;
+    const note = r.price_note || (r.platform === 'StubHub' ? 'all-in' : '');
+    const noteStr = note ? `<div class="plat-note">${esc(note)} · checked ${timeAgo(r.last_checked)}</div>` : `<div class="plat-note">checked ${timeAgo(r.last_checked)}</div>`;
+    const tags = (isLow ? '<span class="tag-low">★ NEW LOW</span>' : '') + (isDeal && !isLow ? '<span class="tag-deal">DEAL</span>' : '');
+    const tc = r.ticket_count || r.listing_count;
+    const countStr = tc ? `<span class="plat-count">${Number(tc).toLocaleString()} ${r.ticket_count ? 'tickets' : 'listings'}</span>` : '<span class="plat-count"></span>';
+    const buyUrl = r.url_qty2 || r.url;
+    const link = buyUrl ? `<a class="buy" href="${esc(buyUrl)}" target="_blank" rel="noopener">View →</a>` : '';
+    const eventLabel = r.event && r.event.length > 10 ? `<div style="font-size:0.68rem;color:var(--muted);margin-bottom:2px;line-height:1.3">${esc(r.event.slice(0,80))}</div>` : '';
+
+    html += `<div class="platform-row">
+      ${logo}
+      <div class="plat-name">${esc(plat.label)}</div>
+      <div class="plat-price-wrap">
+        ${eventLabel}
+        <div style="display:flex;align-items:center;gap:6px">${priceStr}<span class="plat-tags">${tags}</span></div>
+        ${noteStr}
+      </div>
+      ${countStr}
+      ${link}
+    </div>`;
+  }
+  return html;
+}
+
+// ── Render Reddit posts ───────────────────────────────────────────────────────
+function renderReddit(rows) {
+  const redditRows = rows.filter(r => r.platform.toLowerCase().includes('reddit'));
   const dismissed = getDismissed();
-  let visible = allRows.filter(r => {
-    if (dismissed.has(r._key) && !showDismissed) return false;
-    return matchFilter(r, currentFilter) && (!q || matchText(r, q));
-  });
-  visible.sort((a,b) => {
-    let va = a[sortCol]??'', vb = b[sortCol]??'';
-    if (typeof va==='string') va=va.toLowerCase();
-    if (typeof vb==='string') vb=vb.toLowerCase();
-    return sortAsc ? (va<vb?-1:va>vb?1:0) : (va>vb?-1:va<vb?1:0);
-  });
+  const logo = `<img src="${platLogo('reddit.com')}" alt="Reddit">`;
 
-  const tbody = document.getElementById('tbody');
-  tbody.innerHTML = '';
-  if (!visible.length) {
-    document.getElementById('tbl').style.display='none';
-    document.getElementById('empty').style.display='';
-    return;
+  let html = `<div class="reddit-section">
+    <h3>${logo} Reddit posts (${redditRows.length})</h3>`;
+
+  if (!redditRows.length) {
+    html += `<div class="reddit-empty">No Reddit listings found for this game.</div>`;
+  } else {
+    for (const r of redditRows) {
+      const key = `${r.platform}|${r.event}`;
+      const isDismissed = dismissed.has(key);
+      const price = r.last_price != null ? `<span class="reddit-price">$${Math.round(r.last_price)}</span>` : '';
+      const av = avBadge(r);
+      const sub = r.platform.replace('Reddit ', '');
+      const body = r.body ? `<div class="reddit-post-body">${esc(r.body.slice(0,400))}</div>` : '';
+      const link = r.url ? `<a href="${esc(r.url)}" target="_blank" rel="noopener" style="font-size:0.7rem;color:var(--accent)">Open thread →</a>` : '';
+      const keyEsc = esc(key);
+
+      html += `<div class="reddit-post${isDismissed ? ' dismissed' : ''}">
+        <div class="reddit-post-header">
+          <div class="reddit-post-title">${esc(r.event || '—')}</div>
+          <button class="dismiss-btn" title="Dismiss" onclick="dismiss('${keyEsc}')">✕</button>
+        </div>
+        <div class="reddit-post-meta">
+          <span>${esc(sub)}</span>
+          ${price}
+          ${av}
+          <span>${timeAgo(r.last_checked)}</span>
+          ${link}
+        </div>
+        ${body}
+      </div>`;
+    }
   }
-  document.getElementById('tbl').style.display='';
-  document.getElementById('empty').style.display='none';
-
-  for (const r of visible) {
-    const isDismissed = dismissed.has(r._key);
-    const isLow  = !isDismissed && r.last_price!=null && r.min_seen!=null && r.last_price<=r.min_seen;
-    const isDeal = !isDismissed && r.last_price!=null && r.last_price<CEILING();
-    const cls = [isDismissed?'dismissed':'', isLow?'is-low':'', isDeal&&!isLow?'is-deal':''].filter(Boolean).join(' ');
-    const tags = (isLow ? '<span class="tag tag-low">★ LOW</span>' : '') +
-                 (isDeal&&!isLow ? '<span class="tag tag-deal">DEAL</span>' : '');
-    const av       = avBadge(r);
-    const isMonitoring = r.last_price==null && !r.platform.toLowerCase().includes('reddit');
-    const curStr   = r.last_price!=null
-      ? `$${Math.round(r.last_price)}`
-      : isMonitoring
-        ? '<span style="font-size:0.7rem;color:var(--muted);font-style:italic">Monitoring…</span>'
-        : '—';
-    const bestStr  = r.min_seen!=null   ? `$${Math.round(r.min_seen)} best` : '';
-    const minStr   = r.min_seen!=null   ? `$${Math.round(r.min_seen)}` : '—';
-    const date     = (r.date||'').slice(0,10) || '—';
-    const link     = r.url ? `<a class="buy" href="${esc(r.url)}" target="_blank" rel="noopener">View →</a>` : '';
-    const keyEsc   = esc(r._key||'');
-    const actionBtn = isDismissed
-      ? `<button class="dismiss-btn" title="Restore listing" onclick="restore('${keyEsc}')">↩</button>`
-      : `<button class="dismiss-btn" title="Mark unavailable / dismiss" onclick="dismiss('${keyEsc}')">✕</button>`;
-
-    tbody.insertAdjacentHTML('beforeend', `
-      <tr class="${cls}">
-        <td>${platBadge(r.platform)}</td>
-        <td><div class="ev-name" title="${esc(r.event||'')}">
-          ${esc((r.event||'—').slice(0,140))}${tags}${av}
-        </div></td>
-        <td style="white-space:nowrap;color:var(--muted)">${date}</td>
-        <td style="color:var(--muted);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.venue||'—')}</td>
-        <td>
-          <div class="price-main">${curStr}</div>
-          <div class="price-best">${bestStr}</div>
-        </td>
-        <td style="color:var(--muted)">${minStr}</td>
-        <td style="color:var(--muted);white-space:nowrap">${timeAgo(r.last_checked)}</td>
-        <td class="actions-cell" style="white-space:nowrap">${link}${actionBtn}</td>
-      </tr>`);
-  }
+  html += `</div>`;
+  return html;
 }
 
-function setFilter(f, btn) {
-  currentFilter = f;
-  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  render();
-}
+// ── Render a full game card ───────────────────────────────────────────────────
+function renderGameCard(game, allRows) {
+  const rows = rowsForGame(allRows, game);
+  const platRows = rows.filter(r => !r.platform.toLowerCase().includes('reddit'));
+  const minPriced = platRows.filter(r => r.last_price != null);
+  const bestPrice = minPriced.length ? Math.min(...minPriced.map(r => r.last_price)) : null;
+  const C = getCeiling();
+  const headerColor = bestPrice != null && bestPrice < C ? 'rgba(34,197,94,0.08)' : '';
 
-function sortBy(col) {
-  // Update header arrows
-  document.querySelectorAll('th').forEach(th => {
-    th.classList.remove('active');
-    const arr = th.querySelector('.sort-arrow');
-    if (arr) arr.textContent='↕';
-  });
-  const idx = ['platform','event','date','','last_price','min_seen','last_checked'].indexOf(col);
-  const ths = document.querySelectorAll('th');
-  if (idx>=0 && ths[idx]) {
-    ths[idx].classList.add('active');
-    ths[idx].querySelector('.sort-arrow').textContent = (sortAsc&&sortCol===col)?'↓':'↑';
+  let platformHtml = '';
+  for (const plat of PLATFORMS) {
+    platformHtml += renderPlatRow(plat, rows, {});
   }
-  if (sortCol===col) sortAsc=!sortAsc;
-  else { sortCol=col; sortAsc=(col==='last_price'||col==='min_seen'); }
-  render();
+
+  return `<div class="game-card">
+    <div class="game-card-header" style="background:${headerColor||''}">
+      <div class="game-flags">${game.flags}</div>
+      <div class="game-info">
+        <h2>
+          <span class="game-badge">${esc(game.group)} · Match ${game.num}</span>
+          ${esc(game.teams)}
+        </h2>
+        <div class="game-meta">
+          📅 ${fmtDate(game.date)} · ${esc(game.time)}
+          &nbsp;·&nbsp; 🏟️ ${esc(game.venue)}, ${esc(game.city)}
+          ${bestPrice != null ? `&nbsp;·&nbsp; <strong style="color:var(--yellow)">From $${Math.round(bestPrice)}</strong>` : ''}
+        </div>
+      </div>
+    </div>
+    <div class="platform-section">${platformHtml}</div>
+    ${renderReddit(rows)}
+  </div>`;
 }
 
-// ── summary cards (ceiling-aware, called on load and on ceiling change) ───────
+// ── Render all game panels ────────────────────────────────────────────────────
+let allRows = [];
+let activeTab = 'all';
+
+function renderAll() {
+  const panels = document.getElementById('game-panels');
+  if (!allRows.length) return;
+
+  let html = '';
+  // "All" panel
+  html += `<div class="game-panel${activeTab==='all'?' active':''}" id="panel-all">`;
+  for (const game of GAMES) {
+    html += renderGameCard(game, allRows);
+  }
+  html += '</div>';
+
+  // Individual game panels
+  for (const game of GAMES) {
+    html += `<div class="game-panel${activeTab===game.id?' active':''}" id="panel-${game.id}">`;
+    html += renderGameCard(game, allRows);
+    html += '</div>';
+  }
+
+  panels.innerHTML = html;
+}
+
+// ── Build tabs ────────────────────────────────────────────────────────────────
+function buildTabs() {
+  const tabs = document.getElementById('gameTabs');
+  let html = `<button class="gtab${activeTab==='all'?' active':''}" onclick="setTab('all')">
+    <span class="tab-flags">⚽</span>
+    <span class="tab-teams">All Games</span>
+    <span class="tab-date">${GAMES.length} matches</span>
+  </button>`;
+  for (const g of GAMES) {
+    html += `<button class="gtab${activeTab===g.id?' active':''}" onclick="setTab('${g.id}')">
+      <span class="tab-flags">${g.flags}</span>
+      <span class="tab-teams">${esc(g.teams)}</span>
+      <span class="tab-date">${g.date.slice(5).replace('-','/').replace(/^0/,'')} · ${g.sofi?'SoFi':'Away'}</span>
+    </button>`;
+  }
+  tabs.innerHTML = html;
+}
+
+function setTab(id) {
+  activeTab = id;
+  buildTabs();
+  renderAll();
+  window.scrollTo({ top: 0 });
+}
+
+// ── Summary cards ─────────────────────────────────────────────────────────────
 function updateSummary() {
-  const c = CEILING();
-  const belowCeiling = allRows.filter(r=>r.last_price!=null&&r.last_price<c).length;
-  const lows         = allRows.filter(r=>r.last_price!=null&&r.min_seen!=null&&r.last_price<=r.min_seen).length;
-  const platforms    = [...new Set(allRows.map(r=>r.platform.split(' ')[0]))];
+  const C = getCeiling();
+  const platRows = allRows.filter(r => !r.platform.toLowerCase().includes('reddit'));
+  const redditRows = allRows.filter(r => r.platform.toLowerCase().includes('reddit'));
+  const priced = platRows.filter(r => r.last_price != null);
+  const deals  = priced.filter(r => r.last_price < C);
+  const lows   = priced.filter(r => r.min_seen != null && r.last_price <= r.min_seen);
+  const minOverall = priced.length ? `$${Math.round(Math.min(...priced.map(r=>r.last_price)))}` : '—';
+
   document.getElementById('summary').innerHTML = `
-    <div class="scard"><div class="num">${allRows.length}</div><div class="lbl">Listings tracked</div></div>
-    <div class="scard"><div class="num">${belowCeiling}</div><div class="lbl">Below $${Math.round(c)} ceiling</div></div>
-    <div class="scard"><div class="num">${lows}</div><div class="lbl">All-time lows now</div></div>
-    <div class="scard"><div class="num">${platforms.length}</div><div class="lbl">Platforms</div></div>
+    <div class="scard"><div class="num">${minOverall}</div><div class="lbl">Cheapest ticket</div></div>
+    <div class="scard"><div class="num">${deals.length}</div><div class="lbl">Below $${Math.round(C)}</div></div>
+    <div class="scard"><div class="num">${lows.length}</div><div class="lbl">All-time lows</div></div>
+    <div class="scard"><div class="num">${priced.length}</div><div class="lbl">Priced listings</div></div>
+    <div class="scard"><div class="num">${redditRows.length}</div><div class="lbl">Reddit posts</div></div>
   `;
 }
 
-// ── load data ─────────────────────────────────────────────────────────────────
+// ── Load data ─────────────────────────────────────────────────────────────────
 async function load() {
   try {
-    const res = await fetch('prices.json?_='+Date.now());
+    const res  = await fetch('prices.json?_=' + Date.now());
     if (!res.ok) throw new Error(res.status);
     const data = await res.json();
-    allRows = Object.entries(data).map(([k,v]) => ({...v, _key: k}));
-
-    document.getElementById('spinner').style.display='none';
+    allRows = Object.entries(data).map(([k, v]) => ({...v, _key: k}));
 
     const lastCheck = [...allRows.map(r=>r.last_checked).filter(Boolean)].sort().pop();
-    const platforms = [...new Set(allRows.map(r=>r.platform.split(' ')[0]))];
-
+    const plats = [...new Set(allRows.filter(r=>r.last_price!=null).map(r=>r.platform.split(' ')[0]))];
     document.getElementById('meta').textContent =
-      `${platforms.length} platforms · prices last fetched ${timeAgo(lastCheck)} (hourly by server) · page auto-refreshes every 5 min`;
+      `${plats.length} platforms · prices last fetched ${timeAgo(lastCheck)} (hourly by server) · page refreshes every 5 min`;
 
+    document.getElementById('spinner')?.remove();
     updateSummary();
-    updateToolbar();
-    render();
+    buildTabs();
+    renderAll();
   } catch(e) {
-    document.getElementById('spinner').outerHTML =
-      `<p style="text-align:center;color:#f87171;padding:60px">
-        Could not load prices.json — run the checker first, or check the repo path.<br>
-        <small>${e}</small></p>`;
+    document.getElementById('game-panels').innerHTML =
+      `<div class="error-msg">Could not load prices.json — run the checker first.<br><small>${e}</small></div>`;
   }
 }
 
-// Boot: show auth overlay or load data
+// ── Boot ──────────────────────────────────────────────────────────────────────
 if (isAuthed()) {
   load();
 } else {
   document.getElementById('auth-overlay').style.display = 'flex';
   document.getElementById('spinner').style.display = 'none';
 }
-setInterval(() => { if (isAuthed()) load(); }, 5*60*1000);
+setInterval(() => { if (isAuthed()) load(); }, 5 * 60 * 1000);
 </script>
 </body>
 </html>

@@ -33,7 +33,16 @@ _ATOM = "http://www.w3.org/2005/Atom"
 # r/WorldCup2026Tickets is the primary target — all posts are WC tickets.
 # Others need stricter filtering.
 _PRIMARY_SUB = "WorldCup2026Tickets"
-_OTHER_SUBS = ["soccertickets", "Tickets", "worldcup", "soccer"]
+_OTHER_SUBS = [
+    "soccertickets",
+    "SoccerTickets",
+    "Tickets",
+    "worldcup",
+    "soccer",
+    "FIFAWorldCup",
+    "TicketMarket",
+    "SportsTickets",
+]
 
 _PRICE_RE = re.compile(
     r'(?:\$\s*|face\s+value\s+\$?\s*)(\d{1,2},\d{3}|\d{2,4})(?:\.\d{2})?',
