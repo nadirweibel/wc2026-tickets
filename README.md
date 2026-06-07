@@ -1,5 +1,9 @@
 # WC2026 Ticket Price Checker
 
+**Repo:** https://github.com/nadirweibel/wc2026-tickets  
+**Dashboard:** https://nadirweibel.github.io/wc2026-tickets/
+
+
 Monitors ticket prices every hour for:
 - **Switzerland national team** games (any venue)
 - **All games at SoFi Stadium** (Inglewood / Los Angeles)
