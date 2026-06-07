@@ -8,7 +8,7 @@ JSON-LD Event markup embedded in the search-result HTML.
 import json
 import requests
 from bs4 import BeautifulSoup
-from typing import List, Dict
+from typing import Dict, List, Optional
 
 _HEADERS = {
     "User-Agent": (
@@ -94,7 +94,7 @@ def _from_next(data: dict) -> List[Dict]:
     return out
 
 
-def _from_ld(ld: dict) -> Dict | None:
+def _from_ld(ld: dict) -> Optional[Dict]:
     if ld.get("@type") != "Event":
         return None
     name = ld.get("name", "")

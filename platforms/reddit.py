@@ -1,58 +1,48 @@
 """
-Reddit scraper using Reddit's public JSON API.
+Reddit monitor via RSS feeds.
 
-Reddit serves JSON for any page by appending .json to the URL — no auth,
-no app registration needed. Rate limit is ~60 req/min for unauthenticated
-access, well within our hourly cadence.
+Reddit's JSON API blocks automated requests (Cloudflare 403), but RSS
+feeds remain accessible. Content is Atom XML with HTML-encoded post bodies.
 
-Monitors r/WorldCup2026Tickets plus several other subs, searching for
-posts that mention ticket prices for Swiss games or SoFi/LA games.
+Strategy:
+- r/WorldCup2026Tickets: accept all posts (the whole sub is WC tickets);
+  just extract prices from the HTML body.
+- Other subs: require the post to mention Switzerland or SoFi/LA + a ticket keyword.
 """
 
 import re
 import time
+import xml.etree.ElementTree as ET
+from html import unescape
+from typing import Dict, List, Optional
+
 import requests
-from typing import List, Dict
+from bs4 import BeautifulSoup
 
 _HEADERS = {
-    # Reddit requires a descriptive User-Agent for unauthenticated requests.
-    "User-Agent": "wc2026-ticket-checker/1.0 (price monitor; contact via github.com/nadirweibel/wc2026-tickets)",
-    "Accept": "application/json",
+    "User-Agent": (
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/124.0.0.0 Safari/537.36"
+    ),
+    "Accept": "application/rss+xml, application/xml, */*",
 }
 
-# Subreddits to monitor — checked newest posts + searched
-_MONITOR_SUBS = [
-    "WorldCup2026Tickets",  # most targeted
-    "soccertickets",
-    "Tickets",
-    "FIFA",
-    "worldcup",
-    "soccer",
-]
+_ATOM = "http://www.w3.org/2005/Atom"
 
-# Search terms run against each subreddit
-_SEARCHES = [
-    "Switzerland FIFA World Cup 2026 ticket",
-    "FIFA World Cup 2026 SoFi ticket",
-    "FIFA World Cup 2026 Inglewood ticket",
-    "FIFA World Cup 2026 Los Angeles ticket",
-]
+# r/WorldCup2026Tickets is the primary target — all posts are WC tickets.
+# Others need stricter filtering.
+_PRIMARY_SUB = "WorldCup2026Tickets"
+_OTHER_SUBS = ["soccertickets", "Tickets", "worldcup", "soccer"]
 
-# Dollar amounts between $30 and $8000 are treated as plausible ticket prices
 _PRICE_RE = re.compile(
     r'(?:\$\s*|face\s+value\s+\$?\s*)(\d{1,2},\d{3}|\d{2,4})(?:\.\d{2})?',
     re.IGNORECASE,
 )
-_MIN_P, _MAX_P = 30, 8000
+_MIN_P, _MAX_P = 50, 8000
 
 
 def search(query: str) -> List[Dict]:
-    """
-    Called once per TARGET_SEARCH query by checker.py.
-    On the first query we do the full sweep; subsequent calls are no-ops
-    to avoid redundant requests (results are already deduped by post ID).
-    """
-    # Only do the full sweep on the first query to avoid redundant requests
     if not query.startswith("World Cup Switzerland"):
         return []
     return _sweep()
@@ -60,84 +50,98 @@ def search(query: str) -> List[Dict]:
 
 def _sweep() -> List[Dict]:
     results: List[Dict] = []
-    seen_ids: set = set()
+    seen: set = set()
 
-    for sub in _MONITOR_SUBS:
-        # 1. Newest posts in the sub
-        posts = _fetch(f"https://www.reddit.com/r/{sub}/new.json", {"limit": 25})
-        _parse_posts(posts, seen_ids, results)
-        time.sleep(0.5)   # polite pacing
+    # Primary: all new posts in r/WorldCup2026Tickets
+    _fetch(_f(_PRIMARY_SUB, "new"), {}, _PRIMARY_SUB, seen, results, strict=False)
+    time.sleep(0.5)
 
-        # 2. Search within the sub for WC2026 ticket terms
-        for q in _SEARCHES:
-            posts = _fetch(
-                f"https://www.reddit.com/r/{sub}/search.json",
-                {"q": q, "sort": "new", "t": "month", "limit": 15, "restrict_sr": 1},
-            )
-            _parse_posts(posts, seen_ids, results)
-            time.sleep(0.5)
+    # Search r/WorldCup2026Tickets for Switzerland and SoFi specifically
+    for q in ["switzerland ticket", "sofi stadium ticket", "los angeles ticket"]:
+        _fetch(_f(_PRIMARY_SUB, "search"), {"q": q, "sort": "new", "restrict_sr": "1", "t": "month"},
+               _PRIMARY_SUB, seen, results, strict=False)
+        time.sleep(0.4)
+
+    # Other subs: stricter filter
+    for sub in _OTHER_SUBS:
+        _fetch(_f(sub, "new"), {}, sub, seen, results, strict=True)
+        time.sleep(0.4)
 
     return results
 
 
-def _fetch(url: str, params: dict) -> list:
+def _f(sub: str, listing: str) -> str:
+    return f"https://www.reddit.com/r/{sub}/{listing}/.rss"
+
+
+def _fetch(url: str, params: dict, sub: str, seen: set, out: list, strict: bool) -> None:
     try:
         r = requests.get(url, params=params, headers=_HEADERS, timeout=15)
-        if r.status_code == 429:
-            print(f"[Reddit] Rate limited on {url}; skipping.")
-            return []
         if r.status_code != 200:
             print(f"[Reddit] HTTP {r.status_code} for {url}")
-            return []
-        data = r.json()
-        return data.get("data", {}).get("children", [])
+            return
+        _parse(r.text, sub, seen, out, strict)
     except Exception as e:
-        print(f"[Reddit] Error fetching {url}: {e}")
-        return []
+        print(f"[Reddit] Error {url}: {e}")
 
 
-def _parse_posts(children: list, seen_ids: set, results: list) -> None:
-    for child in children:
-        post = child.get("data", {})
-        post_id = post.get("id", "")
-        if not post_id or post_id in seen_ids:
+def _parse(xml_text: str, sub: str, seen: set, out: list, strict: bool) -> None:
+    try:
+        root = ET.fromstring(xml_text)
+    except ET.ParseError as e:
+        print(f"[Reddit] XML error: {e}")
+        return
+
+    for entry in root.findall(f"{{{_ATOM}}}entry"):
+        # Stable ID
+        id_el = entry.find(f"{{{_ATOM}}}id")
+        post_id = (id_el.text or "").split("_")[-1] if id_el is not None else ""
+        if not post_id or post_id in seen:
             continue
-        seen_ids.add(post_id)
+        seen.add(post_id)
 
-        title = post.get("title", "")
-        body  = post.get("selftext", "")
-        text  = f"{title} {body}"
+        # Title
+        title_el = entry.find(f"{{{_ATOM}}}title")
+        title = unescape(title_el.text or "") if title_el is not None else ""
 
-        if not _is_relevant(text):
+        # Body — HTML-encoded, strip tags
+        content_el = entry.find(f"{{{_ATOM}}}content") or entry.find(f"{{{_ATOM}}}summary")
+        raw_html = unescape(content_el.text or "") if content_el is not None else ""
+        body = BeautifulSoup(raw_html, "lxml").get_text(" ", strip=True) if raw_html else ""
+
+        # Link
+        link_el = entry.find(f"{{{_ATOM}}}link")
+        url = link_el.get("href", "") if link_el is not None else ""
+
+        full_text = f"{title} {body}"
+
+        # Relevance gate
+        if strict and not _is_relevant(full_text):
             continue
 
-        prices = _extract_prices(text)
+        # Must mention a price
+        prices = _extract_prices(full_text)
         if not prices:
             continue
 
-        sub_name = post.get("subreddit", "")
-        results.append({
-            "platform": f"Reddit r/{sub_name}",
+        out.append({
+            "platform": f"Reddit r/{sub}",
             "event": title[:120],
             "date": "",
             "venue": "",
-            "url": f"https://reddit.com{post.get('permalink', '')}",
+            "url": url,
             "min_price": min(prices),
             "currency": "USD",
-            "section": post_id,   # stable unique key in prices.json
+            "section": post_id,
         })
 
 
 def _is_relevant(text: str) -> bool:
     t = text.lower()
-    has_wc = "world cup" in t or "fifa" in t or "wc2026" in t or "wc 2026" in t
-    has_target = (
-        "switzerland" in t or "swiss" in t
-        or "sofi" in t or "inglewood" in t
-        or "los angeles" in t
-    )
-    has_ticket = any(w in t for w in ("ticket", "seat", "selling", "wtb", "wts", "for sale", "face value"))
-    return has_wc and (has_target or has_ticket)
+    has_wc = "world cup" in t or "fifa" in t or "wc2026" in t
+    has_target = "switzerland" in t or "swiss" in t or "sofi" in t or "inglewood" in t or "los angeles" in t
+    has_ticket = any(w in t for w in ("ticket", "seat", "wts", "wtb", "for sale", "face value", "fs:"))
+    return has_wc and has_target and has_ticket
 
 
 def _extract_prices(text: str) -> List[float]:
