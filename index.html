@@ -255,6 +255,24 @@
       font-size: 0.72rem; padding: 4px 6px;
     }
 
+    /* ── filter result header ── */
+    .filter-header {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 0 14px; border-bottom: 1px solid var(--border); margin-bottom: 18px;
+    }
+    .filter-header-label {
+      font-size: 0.78rem; color: var(--yellow); font-weight: 700;
+    }
+    .filter-header-sub {
+      font-size: 0.72rem; color: var(--muted);
+    }
+    .filter-header-clear {
+      margin-left: auto; font-size: 0.7rem; color: var(--muted);
+      background: none; border: 1px solid var(--border); border-radius: 6px;
+      padding: 3px 10px; cursor: pointer; transition: color 0.15s, border-color 0.15s;
+    }
+    .filter-header-clear:hover { color: #fff; border-color: #fff; }
+
     /* ── no-listings placeholder ── */
     .no-data { font-size: 0.8rem; color: var(--muted); padding: 14px 24px; font-style: italic; }
 
@@ -727,11 +745,34 @@ function activeGames() {
   return (FILTERS[activeTab] || (() => GAMES.filter(g => g.id === activeTab)))();
 }
 
+function filterLabel() {
+  const labels = {
+    swiss_best:  'Best-priced Switzerland game',
+    swiss_below: `Switzerland games below $${Math.round(getCeiling())}`,
+    swiss_lows:  'Switzerland games at new lows',
+    sofi_best:   'Best-priced SoFi / LA game',
+    sofi_below:  `SoFi / LA games below $${Math.round(getCeiling())}`,
+    sofi_lows:   'SoFi / LA games at new lows',
+    swiss:       'All Switzerland games',
+    sofi:        'All SoFi / LA games',
+  };
+  return labels[activeTab] || null;
+}
+
 function renderAll() {
   const panels = document.getElementById('game-panels');
   if (!allRows.length) return;
   const games = activeGames();
+  const label = filterLabel();
   let html = `<div class="game-panel active">`;
+  if (label) {
+    const n = games.length;
+    html += `<div class="filter-header">
+      <span class="filter-header-label">${n} game${n !== 1 ? 's' : ''}</span>
+      <span class="filter-header-sub">— ${label}</span>
+      <button class="filter-header-clear" onclick="setTab('all')">✕ Show all</button>
+    </div>`;
+  }
   for (const game of games) {
     html += renderGameCard(game, allRows);
   }
