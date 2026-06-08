@@ -114,7 +114,8 @@
     .tab-split { display: flex; gap: 0; align-items: flex-start; }
     .tab-split-swiss { flex: 1; display: flex; flex-wrap: wrap; gap: 6px; }
     .tab-split-gap   { flex-shrink: 0; padding: 0 18px; }
-    .tab-split-sofi  { flex: 1; display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+    .tab-split-sofi  { flex: 1; display: flex; flex-wrap: nowrap; gap: 6px; justify-content: flex-end; }
+    .tab-split-sofi .gtab { min-width: 0; padding: 8px 7px; }
     .gtab {
       background: var(--card); border: 1px solid var(--border); color: var(--muted);
       border-radius: 10px; padding: 8px 12px; font-size: 0.72rem; cursor: pointer;
