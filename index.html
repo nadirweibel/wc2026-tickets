@@ -77,18 +77,14 @@
 
     /* ── summary + filter bar (one combined line) ── */
     .summary { display: flex; gap: 0; padding: 12px 28px; align-items: center; }
-    .summary-group {
-      display: flex; flex-direction: column; gap: 6px; flex: 1;
-      cursor: pointer; border-radius: 12px; padding: 8px 10px; margin: -8px -10px;
-      transition: background 0.15s;
-    }
-    .summary-group:hover { background: rgba(255,255,255,0.04); }
-    .summary-group.active-filter { background: rgba(250,204,21,0.07); }
+    .summary-group { display: flex; flex-direction: column; gap: 6px; flex: 1; }
+    .summary-group.active-filter { background: rgba(250,204,21,0.05); border-radius: 12px; padding: 8px 10px; margin: -8px -10px; }
     .summary-group-label {
       font-size: 0.62rem; font-weight: 700; text-transform: uppercase;
       letter-spacing: 0.8px; color: var(--muted); padding: 0 2px;
-      transition: color 0.15s;
+      cursor: pointer; transition: color 0.15s; display: inline-block;
     }
+    .summary-group-label:hover { color: #fff; }
     .summary-group.active-filter .summary-group-label { color: var(--yellow); }
     .summary-group-right { align-items: flex-end; }
     .summary-group-right .summary-cards { justify-content: flex-end; }
@@ -768,16 +764,24 @@ function updateSummary() {
   const C = getCeiling();
 
   function groupStats(games) {
-    const rows = allRows.filter(r =>
-      games.some(g => rowsForGame([r], g).length > 0) &&
-      !r.platform.toLowerCase().includes('reddit')
-    );
-    const priced = rows.filter(r => r.last_price != null);
-    const best   = priced.length ? Math.min(...priced.map(r => r.last_price)) : null;
-    const below  = priced.filter(r => r.last_price < C).length;
-    const lows   = priced.filter(r => r.min_seen != null && r.last_price <= r.min_seen).length;
-    return { best, below, lows };
-  }
+    // Count GAMES (not listings) — so the number shown = number of game cards the filter will show
+    const gameStats = games.map(g => {
+        const gRows = allRows.filter(r =>
+          rowsForGame([r], g).length > 0 && !r.platform.toLowerCase().includes('reddit') && r.last_price != null
+        );
+        return {
+          minPrice: gRows.length ? Math.min(...gRows.map(r => r.last_price)) : null,
+          hasBelow: gRows.some(r => r.last_price < C),
+          hasLow:   gRows.some(r => r.min_seen != null && r.last_price <= r.min_seen),
+        };
+      });
+      const pricedGames = gameStats.filter(d => d.minPrice != null);
+      return {
+        best:  pricedGames.length ? Math.min(...pricedGames.map(d => d.minPrice)) : null,
+        below: gameStats.filter(d => d.hasBelow).length,
+        lows:  gameStats.filter(d => d.hasLow).length,
+      };
+    }
 
   const swiss = groupStats(GAMES.filter(g => g.swiss));
   const sofi  = groupStats(GAMES.filter(g => g.sofi));
@@ -789,22 +793,23 @@ function updateSummary() {
   const swissCount = GAMES.filter(g => g.swiss).length;
   const sofiCount  = GAMES.filter(g => g.sofi).length;
 
+  // No onclick on the group div — label is clickable for "show all", cards are individually clickable.
+  // This avoids any event-bubbling conflict between the group and card handlers.
   function scard(filterId, num, label, disabled) {
     const isActive = activeTab === filterId;
     const cls = ['scard'];
     if (!disabled) cls.push('scard-btn');
     if (isActive)  cls.push('scard-active');
     const style = disabled ? 'opacity:0.35;' : '';
-    // stopPropagation prevents the card click from also firing the parent group's setTab('swiss'/'sofi')
-    const click = disabled ? '' : `onclick="event.stopPropagation();setTab('${filterId}')"`;
+    const click = disabled ? '' : `onclick="setTab('${filterId}')"`;
     return `<div class="${cls.join(' ')}" style="${style}" ${click}>
       <div class="num">${num}</div><div class="lbl">${label}</div>
     </div>`;
   }
 
   document.getElementById('summary').innerHTML = `
-    <div class="summary-group${swissGroup ? ' active-filter' : ''}" onclick="setTab('swiss')" title="All Switzerland games">
-      <div class="summary-group-label">🇨🇭 Switzerland</div>
+    <div class="summary-group${swissGroup ? ' active-filter' : ''}">
+      <div class="summary-group-label" onclick="setTab('swiss')" title="All Switzerland games">🇨🇭 Switzerland</div>
       <div class="summary-cards">
         ${scard('swiss_best',  fmt(swiss.best),  'Best price',          swiss.best == null)}
         ${scard('swiss_below', swiss.below,      'Below $'+Math.round(C), swiss.below === 0)}
@@ -828,8 +833,8 @@ function updateSummary() {
         <span class="tab-date">${GAMES.length} matches</span>
       </button>
     </div>
-    <div class="summary-group summary-group-right${sofiGroup ? ' active-filter' : ''}" onclick="setTab('sofi')" title="All SoFi / LA games">
-      <div class="summary-group-label">🏟️ SoFi / LA</div>
+    <div class="summary-group summary-group-right${sofiGroup ? ' active-filter' : ''}">
+      <div class="summary-group-label" onclick="setTab('sofi')" title="All SoFi / LA games">🏟️ SoFi / LA</div>
       <div class="summary-cards">
         ${scard('sofi_best',  fmt(sofi.best),  'Best price',          sofi.best == null)}
         ${scard('sofi_below', sofi.below,      'Below $'+Math.round(C), sofi.below === 0)}
