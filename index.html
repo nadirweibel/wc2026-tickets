@@ -671,15 +671,41 @@ function renderReddit(rows) {
 function renderGameCard(game, allRows) {
   const rows = rowsForGame(allRows, game);
   const platRows = rows.filter(r => !r.platform.toLowerCase().includes('reddit'));
-  const minPriced = platRows.filter(r => r.last_price != null);
+  const redditRows = rows.filter(r => r.platform.toLowerCase().includes('reddit'));
+
+  // When a stat-card filter is active, narrow down to only the matching rows
+  // so each game card shows just the specific platform listing(s) the user asked for.
+  let displayPlatRows = platRows;
+  if (activeTab.endsWith('_best')) {
+    const prices = platRows.map(r => r.last_price).filter(p => p != null);
+    if (prices.length) {
+      const minP = Math.min(...prices);
+      displayPlatRows = platRows.filter(r => r.last_price === minP);
+    }
+  } else if (activeTab.endsWith('_below')) {
+    const C = getCeiling();
+    displayPlatRows = platRows.filter(r => r.last_price != null && r.last_price < C);
+  } else if (activeTab.endsWith('_lows')) {
+    displayPlatRows = platRows.filter(r => r.min_seen != null && r.last_price != null && r.last_price <= r.min_seen);
+  }
+
+  const minPriced = displayPlatRows.filter(r => r.last_price != null);
   const bestPrice = minPriced.length ? Math.min(...minPriced.map(r => r.last_price)) : null;
   const C = getCeiling();
   const headerColor = bestPrice != null && bestPrice < C ? 'rgba(34,197,94,0.08)' : '';
 
+  // Rows to pass into renderPlatRow (filtered plat rows + reddit)
+  const rowsForRender = [...displayPlatRows, ...redditRows];
+
   let platformHtml = '';
   for (const plat of PLATFORMS) {
-    platformHtml += renderPlatRow(plat, rows, {});
+    // Under a stat filter: skip platforms that have no matching rows
+    if (STAT_FILTERS.has(activeTab) && !displayPlatRows.some(r => r.platform.startsWith(plat.key))) continue;
+    platformHtml += renderPlatRow(plat, rowsForRender, {});
   }
+
+  // Hide Reddit section under stat filters — user wants specific price options only
+  const redditHtml = STAT_FILTERS.has(activeTab) ? '' : renderReddit(rows);
 
   return `<div class="game-card">
     <div class="game-card-header" style="background:${headerColor||''}">
@@ -697,7 +723,7 @@ function renderGameCard(game, allRows) {
       </div>
     </div>
     <div class="platform-section">${platformHtml}</div>
-    ${renderReddit(rows)}
+    ${redditHtml}
   </div>`;
 }
 
