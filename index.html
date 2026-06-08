@@ -536,19 +536,19 @@ function sortedBuyUrl(r) {
     const u = new URL(base);
     const p = (r.platform || '').toLowerCase();
     if (p.includes('seatgeek')) {
-      // SeatGeek: sort=price shows cheapest first; quantity pre-selects 2 tickets
+      // SeatGeek: sort=price shows cheapest first; quantity=1 shows all listings
       u.searchParams.set('sort', 'price');
-      u.searchParams.set('quantity', '2');
+      u.searchParams.set('quantity', '1');
     } else if (p.includes('stubhub')) {
       // StubHub: sort=price+asc sorts ascending by total price
       u.searchParams.set('sort', 'price asc');
-      u.searchParams.set('quantity', '2');
+      u.searchParams.set('quantity', '1');
     } else if (p.includes('ticketmaster')) {
       // Ticketmaster: sort=ticketsByPrice shows cheapest first
       u.searchParams.set('sort', 'ticketsByPrice');
     } else if (p.includes('vivid')) {
-      // Vivid Seats: quantity filter, sort handled by default (cheapest first)
-      u.searchParams.set('quantity', '2');
+      // Vivid Seats: quantity=1 shows all listings sorted cheapest first by default
+      u.searchParams.set('quantity', '1');
     }
     return u.toString();
   } catch { return base; }

@@ -54,9 +54,10 @@ _EVENTS: List[Dict] = [
     },
 ]
 
-# quantity=2 gives the most listings and best per-ticket price.
+# quantity=1 captures the absolute cheapest per-ticket price across all listings,
+# including single-ticket listings that would be filtered out by quantity=2.
 # sort=price ensures cheapest seats appear first.
-_QTY = "2"
+_QTY = "1"
 
 # ── BrightData config ───────────────────────────────────────────────────────────
 # Set BD_API_KEY and BD_ZONE as GitHub Actions secrets (and in .env for local runs).
