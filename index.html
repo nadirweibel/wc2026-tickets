@@ -76,13 +76,22 @@
     .refresh-btn:hover { background: var(--accent); color: #fff; }
 
     /* ── summary cards ── */
-    .summary { display: flex; gap: 12px; padding: 16px 28px; flex-wrap: wrap; }
+    .summary { display: flex; gap: 0; padding: 14px 28px; align-items: stretch; }
+    .summary-group { display: flex; flex-direction: column; gap: 6px; flex: 1; }
+    .summary-group-label {
+      font-size: 0.62rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.8px; color: var(--muted); padding: 0 2px;
+    }
+    .summary-cards { display: flex; gap: 8px; flex-wrap: wrap; }
+    .summary-divider {
+      width: 1px; background: var(--border); margin: 0 18px; align-self: stretch;
+    }
     .scard {
       background: var(--card); border: 1px solid var(--border); border-radius: 10px;
-      padding: 12px 18px; min-width: 120px;
+      padding: 10px 16px; min-width: 90px;
     }
-    .scard .num { font-size: 1.7rem; font-weight: 800; color: var(--yellow); }
-    .scard .lbl { font-size: 0.68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+    .scard .num { font-size: 1.5rem; font-weight: 800; color: var(--yellow); }
+    .scard .lbl { font-size: 0.62rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
 
     /* ── game tabs ── */
     .game-tabs {
@@ -735,22 +744,41 @@ function setTab(id) {
 // ── Summary cards ─────────────────────────────────────────────────────────────
 function updateSummary() {
   const C = getCeiling();
-  // Filter to only rows that belong to currently-visible games
-  const visibleGames = activeGames();
-  const visibleRows = allRows.filter(r => visibleGames.some(g => rowsForGame([r], g).length > 0));
-  const platRows = visibleRows.filter(r => !r.platform.toLowerCase().includes('reddit'));
-  const redditRows = visibleRows.filter(r => r.platform.toLowerCase().includes('reddit'));
-  const priced = platRows.filter(r => r.last_price != null);
-  const deals  = priced.filter(r => r.last_price < C);
-  const lows   = priced.filter(r => r.min_seen != null && r.last_price <= r.min_seen);
-  const minOverall = priced.length ? `$${Math.round(Math.min(...priced.map(r=>r.last_price)))}` : '—';
+
+  function groupStats(games) {
+    const rows = allRows.filter(r =>
+      games.some(g => rowsForGame([r], g).length > 0) &&
+      !r.platform.toLowerCase().includes('reddit')
+    );
+    const priced = rows.filter(r => r.last_price != null);
+    const best   = priced.length ? Math.min(...priced.map(r => r.last_price)) : null;
+    const below  = priced.filter(r => r.last_price < C).length;
+    const lows   = priced.filter(r => r.min_seen != null && r.last_price <= r.min_seen).length;
+    return { best, below, lows };
+  }
+
+  const swiss = groupStats(GAMES.filter(g => g.swiss));
+  const sofi  = groupStats(GAMES.filter(g => g.sofi));
+  const fmt   = v => v != null ? `$${Math.round(v)}` : '—';
 
   document.getElementById('summary').innerHTML = `
-    <div class="scard"><div class="num">${minOverall}</div><div class="lbl">Cheapest ticket</div></div>
-    <div class="scard"><div class="num">${deals.length}</div><div class="lbl">Below $${Math.round(C)}</div></div>
-    <div class="scard"><div class="num">${lows.length}</div><div class="lbl">All-time lows</div></div>
-    <div class="scard"><div class="num">${priced.length}</div><div class="lbl">Priced listings</div></div>
-    <div class="scard"><div class="num">${redditRows.length}</div><div class="lbl">Reddit posts</div></div>
+    <div class="summary-group">
+      <div class="summary-group-label">🇨🇭 Switzerland</div>
+      <div class="summary-cards">
+        <div class="scard"><div class="num">${fmt(swiss.best)}</div><div class="lbl">Best price</div></div>
+        <div class="scard"><div class="num">${swiss.below}</div><div class="lbl">Below $${Math.round(C)}</div></div>
+        <div class="scard"><div class="num">${swiss.lows}</div><div class="lbl">New lows</div></div>
+      </div>
+    </div>
+    <div class="summary-divider"></div>
+    <div class="summary-group">
+      <div class="summary-group-label">🏟️ SoFi / LA</div>
+      <div class="summary-cards">
+        <div class="scard"><div class="num">${fmt(sofi.best)}</div><div class="lbl">Best price</div></div>
+        <div class="scard"><div class="num">${sofi.below}</div><div class="lbl">Below $${Math.round(C)}</div></div>
+        <div class="scard"><div class="num">${sofi.lows}</div><div class="lbl">New lows</div></div>
+      </div>
+    </div>
   `;
 }
 
