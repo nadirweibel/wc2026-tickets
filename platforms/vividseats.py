@@ -34,6 +34,8 @@ _QUERIES = [
     "los angeles world cup 2026",
 ]
 
+_QTYS = [1, 2, 3, 4]
+
 
 def _make_session() -> requests.Session:
     s = requests.Session()
@@ -82,34 +84,68 @@ def search(query: str) -> List[Dict]:
                     continue
                 seen.add(vid)
 
-                # Prefer all-in price (includes service fees); fall back to base price
-                aip = item.get("minAipPrice")
-                base = item.get("minPrice")
-                min_price = aip if aip is not None else base
-
                 web_path = item.get("webPath") or item.get("organicUrl") or ""
-                url = (
+                base_url = (
                     f"https://www.vividseats.com{web_path}"
                     if web_path.startswith("/")
                     else f"https://www.vividseats.com/tickets/production/{vid}"
                 )
-                # Deep-link with qty=2 so the page opens pre-filtered to pairs
-                url_2 = url + ("&" if "?" in url else "?") + "qty=2"
+
+                # Try each quantity via the API; VS may return different minAipPrice per qty.
+                best_price: float | None = None
+                best_qty: int | None = None
+                price_by_qty: dict = {}
+                for qty in _QTYS:
+                    try:
+                        r_qty = session.get(
+                            f"{_BASE}/{vid}",
+                            params={"quantity": qty},
+                            timeout=10,
+                        )
+                        if r_qty.status_code == 200 and "application/json" in r_qty.headers.get("content-type",""):
+                            j = r_qty.json()
+                            aip_q = j.get("minAipPrice") or j.get("minPrice")
+                            if aip_q is not None:
+                                price_by_qty[qty] = float(aip_q)
+                                if best_price is None or float(aip_q) < best_price:
+                                    best_price = float(aip_q)
+                                    best_qty = qty
+                    except Exception:
+                        pass
+                    time.sleep(0.15)
+
+                # Fall back to the event-level price from the search result
+                if best_price is None:
+                    aip = item.get("minAipPrice")
+                    base_p = item.get("minPrice")
+                    raw = aip if aip is not None else base_p
+                    best_price = float(raw) if raw is not None else None
+                    best_qty = None
+
+                qty_log = "  ".join(
+                    f"qty{q}=${price_by_qty[q]:.0f}" if q in price_by_qty else f"qty{q}=—"
+                    for q in _QTYS
+                )
+                if best_price:
+                    print(f"[VividSeats] {name[:45]:45s}  {qty_log}  → best ${best_price:.0f}"
+                          + (f" (qty={best_qty})" if best_qty else ""))
+
+                aip_flag = item.get("minAipPrice") is not None
 
                 results.append({
                     "platform": "VividSeats",
                     "event": name,
                     "date": (item.get("localDate") or "")[:19],
                     "venue": venue,
-                    "url": url,
-                    "url_qty2": url_2,
-                    "min_price": float(min_price) if min_price is not None else None,
-                    "base_price": float(base) if base is not None else None,
+                    "url": base_url,
+                    "min_price": best_price,
+                    "base_price": float(item["minPrice"]) if item.get("minPrice") is not None else None,
                     "max_price": item.get("maxPrice"),
                     "currency": "USD",
                     "listing_count": item.get("listingCount"),
                     "ticket_count": item.get("ticketCount"),
-                    "price_note": "all-in" if aip is not None else "excl. fees",
+                    "price_note": "all-in" if aip_flag else "excl. fees",
+                    "best_qty": best_qty,
                     "_vs_id": vid,
                 })
         except Exception as e:

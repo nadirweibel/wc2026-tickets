@@ -543,20 +543,18 @@ function sortedBuyUrl(r) {
   try {
     const u = new URL(base);
     const p = (r.platform || '').toLowerCase();
+    const qty = r.best_qty || 1;
     if (p.includes('seatgeek')) {
-      // SeatGeek: use the quantity that gave the best price (stored as best_qty)
       u.searchParams.set('sort', 'price');
-      u.searchParams.set('quantity', String(r.best_qty || 1));
+      u.searchParams.set('quantity', String(qty));
     } else if (p.includes('stubhub')) {
-      // StubHub: sort=price+asc sorts ascending by total price
       u.searchParams.set('sort', 'price asc');
-      u.searchParams.set('quantity', '1');
+      u.searchParams.set('quantity', String(qty));
     } else if (p.includes('ticketmaster')) {
-      // Ticketmaster: sort=ticketsByPrice shows cheapest first
       u.searchParams.set('sort', 'ticketsByPrice');
+      u.searchParams.set('qty', String(qty));
     } else if (p.includes('vivid')) {
-      // Vivid Seats: quantity=1 shows all listings sorted cheapest first by default
-      u.searchParams.set('quantity', '1');
+      u.searchParams.set('quantity', String(qty));
     }
     return u.toString();
   } catch { return base; }
@@ -591,13 +589,13 @@ function renderPlatRow(plat, rows, history) {
     const isLow  = price != null && minSeen != null && price <= minSeen;
     const isDeal = price != null && price < C;
 
-    // Quantity context — how many tickets must be bought to get this price
-    const qty = r.best_qty || null;  // only SeatGeek populates this currently
+    // Quantity context — which qty gave the best price (all platforms now report this)
+    const qty = r.best_qty || null;
 
     // Build the price display
     let priceStr;
     if (price != null) {
-      const qtyChip = qty
+      const qtyChip = (qty && !isManual)
         ? `<span class="qty-chip">×${qty} ticket${qty > 1 ? 's' : ''}</span>`
         : '';
       priceStr = `<span class="plat-price">$${Math.round(price)}</span>${qtyChip}`;

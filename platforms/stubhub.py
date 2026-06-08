@@ -1,29 +1,26 @@
 """
 StubHub — Playwright-based scraper.
 
-StubHub's JSON-LD schema.org markup shows BASE prices (before buyer fees of
-~30–35%). The DOM listings show "We're All In" prices that users actually pay.
-This scraper loads each event page in headless Chrome and extracts DOM prices.
+Loads each event page with quantities 1–4 in parallel (separate browser tabs).
+StubHub's ?quantity=N URL param filters the listing view, so different quantities
+can surface different cheapest-available prices (some listings only sell in pairs,
+some only in groups of 4, etc.).
 
-Falls back gracefully to null-price entries if Playwright is not installed
-(GitHub Actions also blocks StubHub via Akamai — prices are preserved across
-null runs by checker.py's null-price logic).
+Falls back gracefully to null-price entries if Playwright is not installed or if
+Akamai blocks the request (checker.py preserves last known prices on null runs).
 
 Requires: playwright (`pip install playwright && playwright install chromium`)
 """
 
 import asyncio
 import re
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
 _USER_AGENT = (
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
     "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36"
 )
 
-# Hardcoded event URLs discovered via StubHub search / grouping pages.
-# Use ?quantity=1 at scrape time → show per-ticket (single-seat) prices.
-# Keyed by StubHub event ID.
 _EVENTS: Dict[str, dict] = {
     # ── Switzerland group-stage ────────────────────────────────────────────
     "153020611": {
@@ -81,34 +78,28 @@ _EVENTS: Dict[str, dict] = {
         "venue": "SoFi Stadium",
         "url": "https://www.stubhub.com/world-cup-inglewood-tickets-7-2-2026/event/153020726/",
     },
-    # Quarterfinals July 10 at SoFi — StubHub event ID TBD; add when listed
 }
 
-_MAX_CONCURRENT = 3
-_PAGE_SETTLE = 5   # seconds to wait for JS rendering after domcontentloaded
+_QTYS = ["1", "2", "3", "4"]
+_MAX_CONCURRENT = 3   # concurrent events (each spawns 4 qty pages)
+_PAGE_SETTLE = 5      # seconds to wait for JS rendering after domcontentloaded
 
 
 def search(query: str, api_key: str = "") -> List[Dict]:
-    """Run once per checker cycle; api_key kept for interface compatibility."""
     if not query.startswith("World Cup Switzerland"):
         return []
-
     try:
         import playwright  # noqa: F401
     except ImportError:
         print("[StubHub] playwright not installed — returning null-price entries")
         return _null_entries()
-
     try:
         return asyncio.run(_scrape_all())
     except RuntimeError:
         import concurrent.futures
         with concurrent.futures.ThreadPoolExecutor(max_workers=1) as ex:
-            fut = ex.submit(asyncio.run, _scrape_all())
-            return fut.result()
+            return ex.submit(asyncio.run, _scrape_all()).result()
 
-
-# ── async scraper ─────────────────────────────────────────────────────────────
 
 async def _scrape_all() -> List[Dict]:
     from playwright.async_api import async_playwright
@@ -117,15 +108,11 @@ async def _scrape_all() -> List[Dict]:
     sem = asyncio.Semaphore(_MAX_CONCURRENT)
 
     async with async_playwright() as pw:
-        # Use system Chrome if available (better Akamai bypass), fall back to Playwright Chromium
         chrome_path = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
         launch_kwargs = dict(
             headless=True,
-            args=[
-                "--disable-blink-features=AutomationControlled",
-                "--no-sandbox",
-                "--disable-setuid-sandbox",
-            ],
+            args=["--disable-blink-features=AutomationControlled",
+                  "--no-sandbox", "--disable-setuid-sandbox"],
         )
         if os.path.exists(chrome_path):
             launch_kwargs["executable_path"] = chrome_path
@@ -147,71 +134,86 @@ async def _scrape_all() -> List[Dict]:
     return [r for r in results if r is not None]
 
 
+async def _fetch_qty_page(ctx, meta: dict, qty: str) -> Tuple[str, Optional[float], Optional[int]]:
+    """Load one StubHub event page with a specific quantity filter, return (qty, price, listing_count)."""
+    from playwright.async_api import TimeoutError as PWTimeout
+    page = await ctx.new_page()
+    try:
+        url = meta["url"].rstrip("/") + f"/?quantity={qty}"
+        await page.goto(url, timeout=30_000, wait_until="domcontentloaded")
+        await asyncio.sleep(_PAGE_SETTLE)
+
+        data = await page.evaluate(r"""() => {
+            const text = document.body.innerText;
+            const countMatch = text.match(/([0-9,]+)\s+listings?/i);
+            const listingCount = countMatch ? parseInt(countMatch[1].replace(/,/g,'')) : null;
+            const priceMatches = text.match(/\$([0-9]{2,4}(?:,[0-9]{3})*(?:\.[0-9]{2})?)/g) || [];
+            const prices = priceMatches
+                .map(m => parseFloat(m.replace(/[$,]/g, '')))
+                .filter(p => p >= 50 && p <= 9999);
+            return {listingCount, prices};
+        }""")
+
+        prices = data.get("prices", [])
+        price = min(prices) if prices else None
+        return qty, price, data.get("listingCount")
+    except Exception as e:
+        print(f"[StubHub] Error qty={qty} {meta['name'][:35]}: {e}")
+        return qty, None, None
+    finally:
+        await page.close()
+
+
 async def _scrape_event(ctx, sem, event_id: str, meta: dict) -> Optional[Dict]:
     async with sem:
-        page = await ctx.new_page()
-        try:
-            # quantity=1 → show per-ticket (cheapest single-seat) prices
-            url = meta["url"].rstrip("/") + "/?quantity=1"
-            await page.goto(url, timeout=30000, wait_until="domcontentloaded")
-            await asyncio.sleep(_PAGE_SETTLE)  # wait for JS rendering
+        # Fetch all quantities in parallel
+        qty_results = await asyncio.gather(
+            *[_fetch_qty_page(ctx, meta, qty) for qty in _QTYS]
+        )
 
-            data = await page.evaluate("""() => {
-                const text = document.body.innerText;
+        best_qty: Optional[str] = None
+        best_price: Optional[float] = None
+        best_listing_count: Optional[int] = None
+        price_by_qty: Dict[str, Optional[float]] = {}
 
-                // Listing count: "370 listings" or "View 370 Listings"
-                const countMatch = text.match(/([0-9,]+)\\s+listings?/i);
-                const listingCount = countMatch
-                    ? parseInt(countMatch[1].replace(/,/g,'')) : null;
+        for qty, price, listing_count in qty_results:
+            price_by_qty[qty] = price
+            if price is not None and (best_price is None or price < best_price):
+                best_price = price
+                best_qty = qty
+                best_listing_count = listing_count
 
-                // All prices on the page — these are "We're All In" all-inclusive prices.
-                // StubHub renders prices in the format "$NNN" or "$N,NNN".
-                const priceMatches = text.match(/\\$([0-9]{2,4}(?:,[0-9]{3})*(?:\\.[0-9]{2})?)/g) || [];
-                const prices = priceMatches
-                    .map(m => parseFloat(m.replace(/[$,]/g, '')))
-                    .filter(p => p >= 50 && p <= 9999);
+        qty_log = "  ".join(
+            f"qty{q}=${price_by_qty[q]:.0f}" if price_by_qty.get(q) else f"qty{q}=—"
+            for q in _QTYS
+        )
+        if best_price:
+            print(f"[StubHub] {meta['name'][:45]:45s}  {qty_log}  → best ${best_price:.0f} (qty={best_qty})")
+        else:
+            print(f"[StubHub] {meta['name'][:45]:45s}  no data")
 
-                return {listingCount, prices};
-            }""")
+        return {
+            "platform":      "StubHub",
+            "event":         meta["name"],
+            "date":          meta["date"],
+            "venue":         meta["venue"],
+            "url":           meta["url"],
+            "min_price":     best_price,
+            "price_note":    "all-in" if best_price else None,
+            "listing_count": best_listing_count,
+            "best_qty":      int(best_qty) if best_qty else None,
+            "currency":      "USD",
+        }
 
-            prices = data.get("prices", [])
-            min_price = min(prices) if prices else None
-            listing_count = data.get("listingCount")
-
-            if min_price:
-                print(f"[StubHub] {meta['name'][:50]:50s} ${min_price:.0f} all-in ({listing_count} listings)")
-            else:
-                print(f"[StubHub] {meta['name'][:50]:50s} no data")
-
-            return {
-                "platform": "StubHub",
-                "event": meta["name"],
-                "date": meta["date"],
-                "venue": meta["venue"],
-                "url": meta["url"],
-                "min_price": min_price,
-                "price_note": "all-in" if min_price else None,
-                "listing_count": listing_count,
-                "currency": "USD",
-            }
-
-        except Exception as e:
-            print(f"[StubHub] Error {meta['name'][:40]}: {e}")
-            return None
-        finally:
-            await page.close()
-
-
-# ── fallback ──────────────────────────────────────────────────────────────────
 
 def _null_entries() -> List[Dict]:
     return [
         {
             "platform": "StubHub",
-            "event": meta["name"],
-            "date": meta["date"],
-            "venue": meta["venue"],
-            "url": meta["url"],
+            "event":    meta["name"],
+            "date":     meta["date"],
+            "venue":    meta["venue"],
+            "url":      meta["url"],
             "min_price": None,
             "currency": "USD",
         }
