@@ -99,9 +99,12 @@
     }
     .scard {
       background: var(--card); border: 1px solid var(--border); border-radius: 10px;
-      padding: 10px 16px; min-width: 86px; transition: border-color 0.15s;
+      padding: 10px 16px; min-width: 86px; transition: border-color 0.15s, background 0.15s;
     }
-    .summary-group.active-filter .scard { border-color: rgba(250,204,21,0.35); }
+    .scard-btn { cursor: pointer; }
+    .scard-btn:hover { border-color: rgba(250,204,21,0.5); background: rgba(250,204,21,0.06); }
+    .scard-active { border-color: rgba(250,204,21,0.75) !important; background: rgba(250,204,21,0.12) !important; }
+    .summary-group.active-filter .scard { border-color: rgba(250,204,21,0.25); }
     .scard .num { font-size: 1.5rem; font-weight: 800; color: var(--yellow); }
     .scard .lbl { font-size: 0.62rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
 
@@ -683,10 +686,39 @@ let allRows = [];
 let activeTab = 'all';
 
 // Filter views: which games to show for special tabs
+function _gamesWithPrice(games, pred) {
+  return games.filter(g => {
+    const rows = allRows.filter(r =>
+      rowsForGame([r], g).length > 0 && !r.platform.toLowerCase().includes('reddit')
+    );
+    return rows.some(r => r.last_price != null && pred(r));
+  });
+}
+function _gameBestPrice(games) {
+  // Return the single game with the lowest current price
+  let best = null, bestPrice = Infinity;
+  for (const g of games) {
+    const rows = allRows.filter(r =>
+      rowsForGame([r], g).length > 0 && !r.platform.toLowerCase().includes('reddit')
+    );
+    const prices = rows.map(r => r.last_price).filter(p => p != null);
+    if (prices.length) {
+      const min = Math.min(...prices);
+      if (min < bestPrice) { bestPrice = min; best = g; }
+    }
+  }
+  return best ? [best] : games;
+}
 const FILTERS = {
-  all:   () => GAMES,
-  swiss: () => GAMES.filter(g => g.swiss),
-  sofi:  () => GAMES.filter(g => g.sofi),
+  all:        () => GAMES,
+  swiss:      () => GAMES.filter(g => g.swiss),
+  sofi:       () => GAMES.filter(g => g.sofi),
+  swiss_best: () => _gameBestPrice(GAMES.filter(g => g.swiss)),
+  swiss_below:() => _gamesWithPrice(GAMES.filter(g => g.swiss), r => r.last_price < getCeiling()),
+  swiss_lows: () => _gamesWithPrice(GAMES.filter(g => g.swiss), r => r.min_seen != null && r.last_price <= r.min_seen),
+  sofi_best:  () => _gameBestPrice(GAMES.filter(g => g.sofi)),
+  sofi_below: () => _gamesWithPrice(GAMES.filter(g => g.sofi),  r => r.last_price < getCeiling()),
+  sofi_lows:  () => _gamesWithPrice(GAMES.filter(g => g.sofi),  r => r.min_seen != null && r.last_price <= r.min_seen),
 };
 
 function activeGames() {
@@ -751,28 +783,41 @@ function updateSummary() {
   const sofi  = groupStats(GAMES.filter(g => g.sofi));
   const fmt   = v => v != null ? `$${Math.round(v)}` : '—';
 
-  const swissActive = activeTab === 'swiss';
-  const sofiActive  = activeTab === 'sofi';
-  const allActive   = activeTab === 'all';
-  const swissCount  = GAMES.filter(g => g.swiss).length;
-  const sofiCount   = GAMES.filter(g => g.sofi).length;
+  const swissGroup = activeTab === 'swiss' || activeTab.startsWith('swiss_');
+  const sofiGroup  = activeTab === 'sofi'  || activeTab.startsWith('sofi_');
+  const allActive  = activeTab === 'all';
+  const swissCount = GAMES.filter(g => g.swiss).length;
+  const sofiCount  = GAMES.filter(g => g.sofi).length;
+
+  function scard(filterId, num, label, disabled) {
+    const isActive = activeTab === filterId;
+    const cls = ['scard'];
+    if (!disabled) cls.push('scard-btn');
+    if (isActive)  cls.push('scard-active');
+    const style = disabled ? 'opacity:0.35;' : '';
+    // stopPropagation prevents the card click from also firing the parent group's setTab('swiss'/'sofi')
+    const click = disabled ? '' : `onclick="event.stopPropagation();setTab('${filterId}')"`;
+    return `<div class="${cls.join(' ')}" style="${style}" ${click}>
+      <div class="num">${num}</div><div class="lbl">${label}</div>
+    </div>`;
+  }
 
   document.getElementById('summary').innerHTML = `
-    <div class="summary-group${swissActive ? ' active-filter' : ''}" onclick="setTab('swiss')" title="Switzerland games">
+    <div class="summary-group${swissGroup ? ' active-filter' : ''}" onclick="setTab('swiss')" title="All Switzerland games">
       <div class="summary-group-label">🇨🇭 Switzerland</div>
       <div class="summary-cards">
-        <div class="scard"><div class="num">${fmt(swiss.best)}</div><div class="lbl">Best price</div></div>
-        <div class="scard"><div class="num">${swiss.below}</div><div class="lbl">Below $${Math.round(C)}</div></div>
-        <div class="scard"><div class="num">${swiss.lows}</div><div class="lbl">New lows</div></div>
+        ${scard('swiss_best',  fmt(swiss.best),  'Best price',          swiss.best == null)}
+        ${scard('swiss_below', swiss.below,      'Below $'+Math.round(C), swiss.below === 0)}
+        ${scard('swiss_lows',  swiss.lows,       'New lows',            swiss.lows  === 0)}
       </div>
     </div>
     <div class="summary-center">
-      <button class="gtab filter-tab${swissActive ? ' active' : ''}" onclick="setTab('swiss')">
+      <button class="gtab filter-tab${swissGroup ? ' active' : ''}" onclick="setTab('swiss')">
         <span class="tab-flags">🇨🇭</span>
         <span class="tab-teams">Switzerland</span>
         <span class="tab-date">${swissCount} games</span>
       </button>
-      <button class="gtab filter-tab${sofiActive ? ' active' : ''}" onclick="setTab('sofi')">
+      <button class="gtab filter-tab${sofiGroup ? ' active' : ''}" onclick="setTab('sofi')">
         <span class="tab-flags">🏟️</span>
         <span class="tab-teams">SoFi / LA</span>
         <span class="tab-date">${sofiCount} games</span>
@@ -783,12 +828,12 @@ function updateSummary() {
         <span class="tab-date">${GAMES.length} matches</span>
       </button>
     </div>
-    <div class="summary-group summary-group-right${sofiActive ? ' active-filter' : ''}" onclick="setTab('sofi')" title="SoFi / LA games">
+    <div class="summary-group summary-group-right${sofiGroup ? ' active-filter' : ''}" onclick="setTab('sofi')" title="All SoFi / LA games">
       <div class="summary-group-label">🏟️ SoFi / LA</div>
       <div class="summary-cards">
-        <div class="scard"><div class="num">${fmt(sofi.best)}</div><div class="lbl">Best price</div></div>
-        <div class="scard"><div class="num">${sofi.below}</div><div class="lbl">Below $${Math.round(C)}</div></div>
-        <div class="scard"><div class="num">${sofi.lows}</div><div class="lbl">New lows</div></div>
+        ${scard('sofi_best',  fmt(sofi.best),  'Best price',          sofi.best == null)}
+        ${scard('sofi_below', sofi.below,      'Below $'+Math.round(C), sofi.below === 0)}
+        ${scard('sofi_lows',  sofi.lows,       'New lows',            sofi.lows  === 0)}
       </div>
     </div>
   `;
