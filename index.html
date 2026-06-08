@@ -103,6 +103,14 @@
     .summary-group.active-filter .scard { border-color: rgba(250,204,21,0.25); }
     .scard .num { font-size: 1.5rem; font-weight: 800; color: var(--yellow); }
     .scard .lbl { font-size: 0.62rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+    /* quantity chip next to price */
+    .qty-chip {
+      display: inline-block; font-size: 0.65rem; font-weight: 700;
+      background: rgba(122,147,181,0.18); color: var(--muted);
+      border: 1px solid rgba(122,147,181,0.25);
+      border-radius: 4px; padding: 1px 6px; margin-left: 5px;
+      vertical-align: middle; white-space: nowrap;
+    }
 
     /* ── game tabs ── */
     .game-tabs {
@@ -583,10 +591,16 @@ function renderPlatRow(plat, rows, history) {
     const isLow  = price != null && minSeen != null && price <= minSeen;
     const isDeal = price != null && price < C;
 
+    // Quantity context — how many tickets must be bought to get this price
+    const qty = r.best_qty || null;  // only SeatGeek populates this currently
+
     // Build the price display
     let priceStr;
     if (price != null) {
-      priceStr = `<span class="plat-price">$${Math.round(price)}</span>`;
+      const qtyChip = qty
+        ? `<span class="qty-chip">×${qty} ticket${qty > 1 ? 's' : ''}</span>`
+        : '';
+      priceStr = `<span class="plat-price">$${Math.round(price)}</span>${qtyChip}`;
       if (isManual) {
         const ekEsc = esc(r.event).replace(/'/g, "\\'");
         priceStr += ` <button class="sg-enter-btn" style="font-size:0.62rem;padding:2px 7px" onclick="sgEditPrice(this,'${ekEsc}')">Edit</button>`;
@@ -611,9 +625,11 @@ function renderPlatRow(plat, rows, history) {
     } else if (isSeatGeek && !price) {
       noteStr = `<div class="plat-note">DataDome blocks automation — enter price manually above</div>`;
     } else {
-      const note = r.price_note || '';
-      const qtyNote = isSeatGeek && r.best_qty ? `min ${r.best_qty} ticket${r.best_qty > 1 ? 's' : ''}` : '';
-      const noteParts = [note, qtyNote, `checked ${timeAgo(r.last_checked)}`].filter(Boolean);
+      const noteParts = [
+        r.price_note || '',
+        qty && qty > 1 ? `$${Math.round(price * qty)} total` : '',
+        `checked ${timeAgo(r.last_checked)}`,
+      ].filter(Boolean);
       noteStr = `<div class="plat-note">${noteParts.join(' · ')}</div>`;
     }
 
