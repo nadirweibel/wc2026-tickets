@@ -781,6 +781,8 @@ function renderAll() {
 }
 
 // ── Build tabs ────────────────────────────────────────────────────────────────
+const STAT_FILTERS = new Set(['swiss_best','swiss_below','swiss_lows','sofi_best','sofi_below','sofi_lows']);
+
 function buildTabs() {
   const tabs = document.getElementById('gameTabs');
 
@@ -793,10 +795,11 @@ function buildTabs() {
     </button>`;
   }
 
-  // Swiss games on the left, SoFi-only games on the right — mirrors the summary bar layout.
-  // Games that are both Swiss AND SoFi (m26) go in the Swiss column.
-  const swissGames    = GAMES.filter(g => g.swiss);
-  const sofiOnlyGames = GAMES.filter(g => g.sofi && !g.swiss);
+  // Stat-card filters (best/below/lows): show only the matching games as tabs.
+  // Group / game filters: show all games so the user can still navigate freely.
+  const displayGames = STAT_FILTERS.has(activeTab) ? activeGames() : GAMES;
+  const swissGames    = displayGames.filter(g => g.swiss);
+  const sofiOnlyGames = displayGames.filter(g => g.sofi && !g.swiss);
 
   tabs.innerHTML = `
     <div class="tab-split">
