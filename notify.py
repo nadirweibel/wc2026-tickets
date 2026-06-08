@@ -67,7 +67,10 @@ def send_alerts(alerts: list, ceiling: float) -> None:
 <h2 style="color:#003580;border-bottom:3px solid #ffd700;padding-bottom:8px">
   ⚽ FIFA World Cup 2026 — New Price Lows 🇨🇭
 </h2>
-<p>New all-time lows below your <strong>${ceiling:.0f}</strong> ceiling as of <em>{ts}</em>.</p>
+<p>New all-time lows below your <strong>${ceiling:.0f}</strong> ceiling as of <em>{ts}</em>.
+&nbsp;&nbsp;<a href="https://nadirweibel.github.io/wc2026-tickets/"
+   style="color:#fff;background:#003580;padding:5px 12px;border-radius:4px;text-decoration:none;font-size:13px;font-weight:bold">
+   📊 Open dashboard →</a></p>
 <table width="100%" cellpadding="0" cellspacing="0"
        style="border-collapse:collapse;font-size:14px;border:1px solid #ddd">
   <tr style="background:#003580;color:#fff">
