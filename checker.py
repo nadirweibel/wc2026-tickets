@@ -155,7 +155,8 @@ def main() -> None:
         extras = {
             k: listing[k]
             for k in ("price_note", "url_qty2", "listing_count", "ticket_count",
-                      "base_price", "body", "_tm_event_id", "_vs_id", "_sg_event_id")
+                      "base_price", "body", "_tm_event_id", "_vs_id", "_sg_event_id",
+                      "best_qty")
             if listing.get(k) is not None
         }
         history[key] = {
