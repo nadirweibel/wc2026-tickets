@@ -77,19 +77,28 @@
 
     /* ── summary cards ── */
     .summary { display: flex; gap: 0; padding: 14px 28px; align-items: stretch; }
-    .summary-group { display: flex; flex-direction: column; gap: 6px; flex: 1; }
+    .summary-group {
+      display: flex; flex-direction: column; gap: 6px; flex: 1;
+      cursor: pointer; border-radius: 12px; padding: 8px 10px; margin: -8px -10px;
+      transition: background 0.15s;
+    }
+    .summary-group:hover { background: rgba(255,255,255,0.04); }
+    .summary-group.active-filter { background: rgba(250,204,21,0.07); }
     .summary-group-label {
       font-size: 0.62rem; font-weight: 700; text-transform: uppercase;
       letter-spacing: 0.8px; color: var(--muted); padding: 0 2px;
+      transition: color 0.15s;
     }
+    .summary-group.active-filter .summary-group-label { color: var(--yellow); }
     .summary-cards { display: flex; gap: 8px; flex-wrap: wrap; }
     .summary-divider {
-      width: 1px; background: var(--border); margin: 0 18px; align-self: stretch;
+      width: 1px; background: var(--border); margin: 0 26px; align-self: stretch; flex-shrink: 0;
     }
     .scard {
       background: var(--card); border: 1px solid var(--border); border-radius: 10px;
-      padding: 10px 16px; min-width: 90px;
+      padding: 10px 16px; min-width: 90px; transition: border-color 0.15s;
     }
+    .summary-group.active-filter .scard { border-color: rgba(250,204,21,0.35); }
     .scard .num { font-size: 1.5rem; font-weight: 800; color: var(--yellow); }
     .scard .lbl { font-size: 0.62rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
 
@@ -761,8 +770,11 @@ function updateSummary() {
   const sofi  = groupStats(GAMES.filter(g => g.sofi));
   const fmt   = v => v != null ? `$${Math.round(v)}` : '—';
 
+  const swissActive = activeTab === 'swiss' ? ' active-filter' : '';
+  const sofiActive  = activeTab === 'sofi'  ? ' active-filter' : '';
+
   document.getElementById('summary').innerHTML = `
-    <div class="summary-group">
+    <div class="summary-group${swissActive}" onclick="setTab('swiss')" title="Filter to Switzerland games">
       <div class="summary-group-label">🇨🇭 Switzerland</div>
       <div class="summary-cards">
         <div class="scard"><div class="num">${fmt(swiss.best)}</div><div class="lbl">Best price</div></div>
@@ -771,7 +783,7 @@ function updateSummary() {
       </div>
     </div>
     <div class="summary-divider"></div>
-    <div class="summary-group">
+    <div class="summary-group${sofiActive}" onclick="setTab('sofi')" title="Filter to SoFi / LA games">
       <div class="summary-group-label">🏟️ SoFi / LA</div>
       <div class="summary-cards">
         <div class="scard"><div class="num">${fmt(sofi.best)}</div><div class="lbl">Best price</div></div>
