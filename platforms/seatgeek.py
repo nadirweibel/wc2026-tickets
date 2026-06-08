@@ -1,28 +1,31 @@
 """
-SeatGeek — AppleScript + Chrome scraper (macOS only).
+SeatGeek scraper — BrightData Web Unlocker API (primary) with macOS Chrome fallback.
 
-SeatGeek uses DataDome bot protection that blocks all automated requests
-(curl, Playwright+Chromium, Playwright+system Chrome, profile copies, etc.)
-even from residential IPs.  The only reliable path is to drive the user's
-real Chrome via AppleScript, which inherits the existing DataDome session.
+SeatGeek uses DataDome bot protection that blocks all automated requests from
+datacenter IPs (GitHub Actions), residential proxies without proper cookies, and
+headless browsers.  Two bypass paths are implemented in priority order:
 
-Key design: a NEW off-screen Chrome window is opened for each event
-(-3000,-3000 so it is never visible) and closed immediately after scraping.
-Chrome never steals focus from whatever app you are using.
+  1. BrightData Web Unlocker REST API (env: BD_API_KEY + BD_ZONE)
+       Works from GitHub Actions.  Costs ~$1 / 1 000 requests.
+       Set both vars as GitHub Actions secrets to enable.
 
-Behaviour by environment
-  • macOS + Chrome running  → scrapes all events invisibly in the background
-  • macOS + Chrome absent   → null-price entries (last prices preserved by checker.py)
-  • Linux / GitHub Actions  → null-price entries (last prices preserved by checker.py)
+  2. macOS off-screen Chrome via AppleScript (env: no extra vars, darwin only)
+       Drives the user's real Chrome (inheriting its DataDome session cookies).
+       Opens an invisible window at (-3000, -3000) so Chrome never steals focus.
+       Falls back gracefully when Chrome is not running.
 
-JS extraction is written to /tmp/sg_extract.js to avoid AppleScript
-string-escaping issues with embedded quotes in the script literal.
+  3. Null entries — checker.py preserves last known prices automatically.
 """
 
 import json
+import os
+import re
 import subprocess
 import sys
+import time
 from typing import Dict, List, Optional
+
+import requests
 
 # ── Events ─────────────────────────────────────────────────────────────────────
 # Event names MUST match what is already stored in prices.json (they form the
@@ -51,15 +54,21 @@ _EVENTS: List[Dict] = [
     },
 ]
 
-# quantity=2 gives best per-ticket price and most listings.
-# sort=price ensures cheapest seats are on the first page (JS takes Math.min anyway).
-_QTY      = "2"
-_PAGE_WAIT = 14   # seconds to wait after navigation for React to render prices
+# quantity=2 gives the most listings and best per-ticket price.
+# sort=price ensures cheapest seats appear first.
+_QTY = "2"
 
-# Off-screen position: window is opened here so it is never visible on-screen.
+# ── BrightData config ───────────────────────────────────────────────────────────
+# Set BD_API_KEY and BD_ZONE as GitHub Actions secrets (and in .env for local runs).
+# BD_ZONE is the zone name shown in your BrightData dashboard (e.g. "web_unlocker1").
+_BD_API_KEY = os.environ.get("BD_API_KEY", "")
+_BD_ZONE    = os.environ.get("BD_ZONE", "")
+_BD_URL     = "https://api.brightdata.com/request"
+
+# ── macOS Chrome config ─────────────────────────────────────────────────────────
+_PAGE_WAIT = 14           # seconds to wait for React to render
 _OFF_X1, _OFF_Y1, _OFF_X2, _OFF_Y2 = -3000, -3000, -2200, -2200
 
-# JS written to a temp file — avoids AppleScript string-escaping nightmares.
 _JS_EXTRACT = r"""
 (function(){
   var prices = [];
@@ -76,7 +85,6 @@ _JS_EXTRACT = r"""
   });
 })()
 """
-
 _JS_FILE = "/tmp/sg_extract.js"
 
 
@@ -87,29 +95,130 @@ def search(query: str, client_id: str = "") -> List[Dict]:
     if not query.startswith("World Cup Switzerland"):
         return []
 
-    if not _chrome_available():
-        print("[SeatGeek] Chrome not available — keeping last prices")
-        return _null_entries()
+    # Priority 1: BrightData (works from GitHub Actions)
+    if _BD_API_KEY and _BD_ZONE:
+        return [_scrape_brightdata(ev) for ev in _EVENTS]
 
+    # Priority 2: macOS Chrome (local only)
+    if _chrome_available():
+        try:
+            with open(_JS_FILE, "w") as fh:
+                fh.write(_JS_EXTRACT)
+        except OSError as e:
+            print(f"[SeatGeek] Could not write JS temp file: {e}")
+            return _null_entries()
+        return [_scrape_chrome(ev) for ev in _EVENTS]
+
+    # Priority 3: null — last prices preserved by checker.py
+    print("[SeatGeek] No scraper available (set BD_API_KEY+BD_ZONE or run on macOS with Chrome)")
+    return _null_entries()
+
+
+# ── BrightData path ─────────────────────────────────────────────────────────────
+
+def _scrape_brightdata(ev: dict) -> Dict:
+    """Fetch one SeatGeek event page via BrightData Web Unlocker REST API."""
+    url = f"{ev['url']}?quantity={_QTY}&sort=price"
     try:
-        with open(_JS_FILE, "w") as fh:
-            fh.write(_JS_EXTRACT)
-    except OSError as e:
-        print(f"[SeatGeek] Could not write JS temp file: {e}")
-        return _null_entries()
+        resp = requests.post(
+            _BD_URL,
+            headers={
+                "Authorization": f"Bearer {_BD_API_KEY}",
+                "Content-Type":  "application/json",
+            },
+            json={
+                "url":    url,
+                "zone":   _BD_ZONE,
+                "format": "raw",
+            },
+            timeout=90,
+        )
+        if resp.status_code != 200:
+            print(f"[SeatGeek/BD] HTTP {resp.status_code} for {ev['name'][:45]}: {resp.text[:120]}")
+            return _null_row(ev)
 
-    return [_scrape_event(ev) for ev in _EVENTS]
+        html = resp.text
+        return _parse_html(ev, html)
+
+    except requests.RequestException as exc:
+        print(f"[SeatGeek/BD] Request error for {ev['name'][:45]}: {exc}")
+        return _null_row(ev)
 
 
-# ── Internal helpers ───────────────────────────────────────────────────────────
+def _parse_html(ev: dict, html: str) -> Dict:
+    """Extract min price and listing count from SeatGeek page HTML."""
+    min_price: Optional[float] = None
+    listing_count: Optional[int] = None
+    all_in = False
+
+    # --- Primary: __NEXT_DATA__ JSON (most reliable, no DOM parsing) ---
+    m = re.search(r'<script id="__NEXT_DATA__"[^>]*>(.*?)</script>', html, re.DOTALL)
+    if m:
+        try:
+            nd = json.loads(m.group(1))
+            sg_event = nd["props"]["pageProps"]["event"]
+            stats = sg_event.get("stats", {})
+            lp = stats.get("lowest_price")
+            if lp is not None and isinstance(lp, (int, float)) and lp > 0:
+                min_price = float(lp)
+                listing_count = stats.get("listing_count") or stats.get("visible_listing_count")
+                # SeatGeek shows all-in prices when these flags are True
+                all_in = bool(
+                    sg_event.get("all_in_price_on_event_page") or
+                    sg_event.get("all_in_price_before_checkout")
+                )
+        except (json.JSONDecodeError, KeyError, TypeError):
+            pass
+
+    # --- Fallback: regex price extraction from rendered HTML ---
+    if min_price is None:
+        all_prices = [int(x) for x in re.findall(r'\$(\d{2,4})', html) if 50 <= int(x) <= 9999]
+        if all_prices:
+            min_price = float(min(all_prices))
+
+    # --- Listing count fallback ---
+    if listing_count is None:
+        cnt = re.search(r'([\d,]+)\s+listings?', html, re.IGNORECASE)
+        if cnt:
+            try:
+                listing_count = int(cnt.group(1).replace(",", ""))
+            except ValueError:
+                pass
+
+    # --- True DataDome block: no __NEXT_DATA__ AND no prices ---
+    if min_price is None and "__NEXT_DATA__" not in html:
+        print(f"[SeatGeek/BD] Blocked (no page data) for {ev['name'][:45]}")
+        return _null_row(ev)
+
+    if min_price:
+        note = "all-in" if all_in else None
+        print(f"[SeatGeek/BD] {ev['name'][:50]:50s} ${min_price:.0f} "
+              f"({'all-in, ' if all_in else ''}{listing_count} listings)")
+    else:
+        print(f"[SeatGeek/BD] {ev['name'][:50]:50s} no price found in response")
+
+    return {
+        "platform":      "SeatGeek",
+        "event":         ev["name"],
+        "date":          ev["date"],
+        "venue":         ev["venue"],
+        "url":           ev["url"],
+        "_sg_event_id":  ev.get("_sg_event_id"),
+        "min_price":     min_price,
+        "price_note":    "all-in" if all_in else None,
+        "listing_count": listing_count,
+        "currency":      "USD",
+    }
+
+
+# ── macOS Chrome path ────────────────────────────────────────────────────────────
 
 def _chrome_available() -> bool:
     if sys.platform != "darwin":
         return False
     try:
         r = subprocess.run(
-            ["osascript", "-e",
-             'tell application "Google Chrome" to return name'],
+            ["osascript", "-e", 'tell application "Google Chrome" to return name'],
             capture_output=True, text=True, timeout=5,
         )
         return r.returncode == 0 and "Chrome" in r.stdout
@@ -117,16 +226,9 @@ def _chrome_available() -> bool:
         return False
 
 
-def _scrape_event(ev: dict) -> Dict:
+def _scrape_chrome(ev: dict) -> Dict:
     """Open one invisible off-screen Chrome window, wait, extract price, close."""
     url = f"{ev['url']}?quantity={_QTY}&sort=price"
-
-    # AppleScript:
-    #  1. Remember which app is frontmost so we can restore focus afterwards.
-    #  2. Open a new Chrome window positioned off-screen (-3000,-3000) — invisible.
-    #  3. Navigate, wait for React to render, extract prices via JS.
-    #  4. Close the window.
-    #  5. Restore focus to the original app so Chrome never steals it.
     script = (
         'set prevApp to name of (info for (path to frontmost application))\n'
         'tell application "Google Chrome"\n'
@@ -148,13 +250,13 @@ def _scrape_event(ev: dict) -> Dict:
             timeout=_PAGE_WAIT + 25,
         )
         if r.returncode != 0:
-            print(f"[SeatGeek] AppleScript error for {ev['name'][:45]}: "
+            print(f"[SeatGeek/Chrome] AppleScript error for {ev['name'][:45]}: "
                   f"{r.stderr.strip()[:80]}")
             return _null_row(ev)
 
         data = json.loads(r.stdout.strip())
-        min_price  = data.get("min")
-        raw_count  = data.get("listings")
+        min_price     = data.get("min")
+        raw_count     = data.get("listings")
         listing_count: Optional[int] = None
         if raw_count:
             try:
@@ -163,10 +265,10 @@ def _scrape_event(ev: dict) -> Dict:
                 pass
 
         if min_price:
-            print(f"[SeatGeek] {ev['name'][:50]:50s} "
+            print(f"[SeatGeek/Chrome] {ev['name'][:50]:50s} "
                   f"${min_price:.0f} ({listing_count} listings)")
         else:
-            print(f"[SeatGeek] {ev['name'][:50]:50s} no data "
+            print(f"[SeatGeek/Chrome] {ev['name'][:50]:50s} no data "
                   f"(title: {data.get('title', '')[:40]})")
 
         return {
@@ -177,21 +279,23 @@ def _scrape_event(ev: dict) -> Dict:
             "url":           ev["url"],
             "_sg_event_id":  ev.get("_sg_event_id"),
             "min_price":     float(min_price) if min_price else None,
-            "price_note":    "all-in" if min_price else None,
+            "price_note":    None,
             "listing_count": listing_count,
             "currency":      "USD",
         }
 
     except subprocess.TimeoutExpired:
-        print(f"[SeatGeek] Timeout for {ev['name'][:45]}")
+        print(f"[SeatGeek/Chrome] Timeout for {ev['name'][:45]}")
         return _null_row(ev)
     except json.JSONDecodeError as exc:
-        print(f"[SeatGeek] JSON error for {ev['name'][:45]}: {exc}")
+        print(f"[SeatGeek/Chrome] JSON error for {ev['name'][:45]}: {exc}")
         return _null_row(ev)
     except Exception as exc:
-        print(f"[SeatGeek] Error for {ev['name'][:45]}: {exc}")
+        print(f"[SeatGeek/Chrome] Error for {ev['name'][:45]}: {exc}")
         return _null_row(ev)
 
+
+# ── Helpers ─────────────────────────────────────────────────────────────────────
 
 def _null_row(ev: dict) -> Dict:
     return {

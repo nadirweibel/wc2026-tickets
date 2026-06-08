@@ -46,6 +46,8 @@ jobs:
           ALERT_EMAIL: ${{ secrets.ALERT_EMAIL }}
           PRICE_CEILING: ${{ secrets.PRICE_CEILING }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          BD_API_KEY: ${{ secrets.BD_API_KEY }}
+          BD_ZONE: ${{ secrets.BD_ZONE }}
         run: python checker.py
 
       - name: Commit updated price history
