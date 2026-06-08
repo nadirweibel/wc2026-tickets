@@ -335,6 +335,7 @@
       <span style="font-size:0.62rem;color:var(--muted)">server-side</span>
     </div>
     <button class="refresh-btn" onclick="load()">↻ Refresh</button>
+    <button class="refresh-btn" id="run-btn" onclick="triggerScrape()" style="background:rgba(34,197,94,0.15);border-color:var(--green);color:var(--green)">▶ Run now</button>
   </div>
 </header>
 
@@ -988,6 +989,73 @@ async function load() {
   } catch(e) {
     document.getElementById('game-panels').innerHTML =
       `<div class="error-msg">Could not load prices.json — run the checker first.<br><small>${e}</small></div>`;
+  }
+}
+
+// ── Trigger GitHub Actions scrape ────────────────────────────────────────────
+const LS_PAT = 'wc2026_gh_pat';
+const GH_DISPATCH = 'https://api.github.com/repos/nadirweibel/wc2026-tickets/actions/workflows/check.yml/dispatches';
+
+async function triggerScrape() {
+  const btn = document.getElementById('run-btn');
+
+  // Get or prompt for PAT (needs workflow scope)
+  let pat = localStorage.getItem(LS_PAT) || '';
+  if (!pat) {
+    pat = window.prompt(
+      'Enter a GitHub personal access token with "workflow" scope.\n' +
+      'It will be saved in localStorage for future use.\n\n' +
+      'Create one at: github.com/settings/tokens/new → check "workflow"'
+    );
+    if (!pat) return;
+    localStorage.setItem(LS_PAT, pat.trim());
+    pat = pat.trim();
+  }
+
+  btn.textContent = '⏳ Triggering…';
+  btn.disabled = true;
+
+  try {
+    const res = await fetch(GH_DISPATCH, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${pat}`,
+        'Accept': 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2022-11-28',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ ref: 'main' }),
+    });
+
+    if (res.status === 204) {
+      btn.textContent = '✓ Running…';
+      btn.style.borderColor = 'var(--yellow)';
+      btn.style.color = 'var(--yellow)';
+      // Auto-reload after ~2 min to pick up fresh prices
+      setTimeout(() => {
+        btn.textContent = '↻ Reloading…';
+        load().then(() => {
+          btn.textContent = '▶ Run now';
+          btn.style.borderColor = 'var(--green)';
+          btn.style.color = 'var(--green)';
+          btn.disabled = false;
+        });
+      }, 120_000);
+    } else if (res.status === 401) {
+      localStorage.removeItem(LS_PAT);
+      alert('Token rejected (401). It has been cleared — try again with a valid token.');
+      btn.textContent = '▶ Run now';
+      btn.disabled = false;
+    } else {
+      const body = await res.text();
+      alert(`GitHub returned ${res.status}:\n${body.slice(0, 200)}`);
+      btn.textContent = '▶ Run now';
+      btn.disabled = false;
+    }
+  } catch (e) {
+    alert(`Network error: ${e}`);
+    btn.textContent = '▶ Run now';
+    btn.disabled = false;
   }
 }
 
