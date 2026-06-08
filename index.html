@@ -528,6 +528,32 @@ function sgEnterPrice(btn, eventKey) {
 }
 function sgEditPrice(btn, eventKey) { sgEnterPrice(btn, eventKey); }
 
+// ── Build a buy URL with sort-by-price params so the dashboard price lands at top ──
+function sortedBuyUrl(r) {
+  const base = r.url_qty2 || r.url;
+  if (!base) return base;
+  try {
+    const u = new URL(base);
+    const p = (r.platform || '').toLowerCase();
+    if (p.includes('seatgeek')) {
+      // SeatGeek: sort=price shows cheapest first; quantity pre-selects 2 tickets
+      u.searchParams.set('sort', 'price');
+      u.searchParams.set('quantity', '2');
+    } else if (p.includes('stubhub')) {
+      // StubHub: sort=price+asc sorts ascending by total price
+      u.searchParams.set('sort', 'price asc');
+      u.searchParams.set('quantity', '2');
+    } else if (p.includes('ticketmaster')) {
+      // Ticketmaster: sort=ticketsByPrice shows cheapest first
+      u.searchParams.set('sort', 'ticketsByPrice');
+    } else if (p.includes('vivid')) {
+      // Vivid Seats: quantity filter, sort handled by default (cheapest first)
+      u.searchParams.set('quantity', '2');
+    }
+    return u.toString();
+  } catch { return base; }
+}
+
 // ── Render one platform row ───────────────────────────────────────────────────
 function renderPlatRow(plat, rows, history) {
   // Find best (lowest current price) entry for this platform+game combination
@@ -597,7 +623,7 @@ function renderPlatRow(plat, rows, history) {
       if (r.listing_count) return `<span class="plat-count">📋 ${Number(r.listing_count).toLocaleString()} listings</span>`;
       return '';
     })();
-    const buyUrl = r.url_qty2 || r.url;
+    const buyUrl = sortedBuyUrl(r);
     const link = buyUrl ? `<a class="buy" href="${esc(buyUrl)}" target="_blank" rel="noopener">View →</a>` : '';
     const eventLabel = r.event && r.event.length > 10 ? `<div style="font-size:0.68rem;color:var(--muted);margin-bottom:2px;line-height:1.3">${esc(r.event.slice(0,80))}</div>` : '';
 
