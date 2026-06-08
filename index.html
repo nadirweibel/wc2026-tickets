@@ -110,6 +110,11 @@
       border-bottom: 1px solid var(--border);
     }
     .tab-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: flex-start; }
+    /* Split tab row: swiss left | spacer | sofi right — aligns under summary bar */
+    .tab-split { display: flex; gap: 0; align-items: flex-start; }
+    .tab-split-swiss { flex: 1; display: flex; flex-wrap: wrap; gap: 6px; }
+    .tab-split-gap   { flex-shrink: 0; padding: 0 18px; }
+    .tab-split-sofi  { flex: 1; display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
     .gtab {
       background: var(--card); border: 1px solid var(--border); color: var(--muted);
       border-radius: 10px; padding: 8px 12px; font-size: 0.72rem; cursor: pointer;
@@ -737,18 +742,26 @@ function renderAll() {
 function buildTabs() {
   const tabs = document.getElementById('gameTabs');
 
-  // Individual game tabs only — filter buttons live in the summary bar now
-  let row = '<div class="tab-row">';
-  for (const g of GAMES) {
-    row += `<button class="gtab${activeTab===g.id?' active':''}" onclick="setTab('${g.id}')">
+  function btn(g) {
+    const venue = g.swiss && !g.sofi ? 'Away' : g.sofi && !g.swiss ? 'SoFi' : 'SoFi 🇨🇭';
+    return `<button class="gtab${activeTab===g.id?' active':''}" onclick="setTab('${g.id}')">
       <span class="tab-flags">${g.flags}</span>
       <span class="tab-teams">${esc(g.teams)}</span>
-      <span class="tab-date">${g.date.slice(5).replace('-','/').replace(/^0/,'')} · ${g.sofi?'SoFi':'Away'}</span>
+      <span class="tab-date">${g.date.slice(5).replace('-','/').replace(/^0/,'')} · ${venue}</span>
     </button>`;
   }
-  row += '</div>';
 
-  tabs.innerHTML = row;
+  // Swiss games on the left, SoFi-only games on the right — mirrors the summary bar layout.
+  // Games that are both Swiss AND SoFi (m26) go in the Swiss column.
+  const swissGames    = GAMES.filter(g => g.swiss);
+  const sofiOnlyGames = GAMES.filter(g => g.sofi && !g.swiss);
+
+  tabs.innerHTML = `
+    <div class="tab-split">
+      <div class="tab-split-swiss">${swissGames.map(btn).join('')}</div>
+      <div class="tab-split-gap"></div>
+      <div class="tab-split-sofi">${sofiOnlyGames.map(btn).join('')}</div>
+    </div>`;
 }
 
 function setTab(id) {

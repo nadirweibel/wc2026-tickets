@@ -39,7 +39,6 @@ _OTHER_SUBS = [
     "Tickets",
     "worldcup",
     "soccer",
-    "FIFAWorldCup",
     "TicketMarket",
     "SportsTickets",
 ]
@@ -57,24 +56,27 @@ def search(query: str) -> List[Dict]:
     return _sweep()
 
 
+_SEARCH_QUERIES = [
+    "switzerland world cup tickets",
+    "swiss world cup tickets",
+    "sofi stadium world cup tickets",
+    "inglewood world cup tickets",
+]
+
 def _sweep() -> List[Dict]:
     results: List[Dict] = []
     seen: set = set()
 
-    # Targeted searches only — never grab the unfiltered "new" feed.
-    # Each query is pre-scoped by Reddit's own search, then _is_relevant
-    # double-checks that the post body matches Switzerland or SoFi/LA.
-    for q in ["switzerland", "swiss tickets", "sofi stadium", "sofi ticket",
-              "inglewood world cup", "los angeles world cup"]:
-        _fetch(_f(_PRIMARY_SUB, "search"),
-               {"q": q, "sort": "new", "restrict_sr": "1", "t": "month"},
-               _PRIMARY_SUB, seen, results, strict=True)
-        time.sleep(0.4)
-
-    # Other subs: strict filter
-    for sub in _OTHER_SUBS:
-        _fetch(_f(sub, "new"), {}, sub, seen, results, strict=True)
-        time.sleep(0.4)
+    # For every sub (primary + others), run targeted search queries instead of
+    # reading the raw /new feed.  Reddit's search pre-filters to relevant posts;
+    # _is_relevant then double-checks the body.
+    all_subs = [_PRIMARY_SUB] + [s for s in _OTHER_SUBS if s != "FIFAWorldCup"]
+    for sub in all_subs:
+        for q in _SEARCH_QUERIES:
+            _fetch(_f(sub, "search"),
+                   {"q": q, "sort": "new", "restrict_sr": "1", "t": "month"},
+                   sub, seen, results, strict=True)
+            time.sleep(0.3)
 
     return results
 
