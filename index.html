@@ -536,9 +536,9 @@ function sortedBuyUrl(r) {
     const u = new URL(base);
     const p = (r.platform || '').toLowerCase();
     if (p.includes('seatgeek')) {
-      // SeatGeek: sort=price shows cheapest first; quantity=1 shows all listings
+      // SeatGeek: use the quantity that gave the best price (stored as best_qty)
       u.searchParams.set('sort', 'price');
-      u.searchParams.set('quantity', '1');
+      u.searchParams.set('quantity', String(r.best_qty || 1));
     } else if (p.includes('stubhub')) {
       // StubHub: sort=price+asc sorts ascending by total price
       u.searchParams.set('sort', 'price asc');
@@ -612,9 +612,9 @@ function renderPlatRow(plat, rows, history) {
       noteStr = `<div class="plat-note">DataDome blocks automation — enter price manually above</div>`;
     } else {
       const note = r.price_note || '';
-      noteStr = note
-        ? `<div class="plat-note">${esc(note)} · checked ${timeAgo(r.last_checked)}</div>`
-        : `<div class="plat-note">checked ${timeAgo(r.last_checked)}</div>`;
+      const qtyNote = isSeatGeek && r.best_qty ? `min ${r.best_qty} ticket${r.best_qty > 1 ? 's' : ''}` : '';
+      const noteParts = [note, qtyNote, `checked ${timeAgo(r.last_checked)}`].filter(Boolean);
+      noteStr = `<div class="plat-note">${noteParts.join(' · ')}</div>`;
     }
 
     const tags = (isLow ? '<span class="tag-low">★ NEW LOW</span>' : '') + (isDeal && !isLow ? '<span class="tag-deal">DEAL</span>' : '');

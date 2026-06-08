@@ -8,6 +8,9 @@ headless browsers.  Two bypass paths are implemented in priority order:
   1. BrightData Web Unlocker REST API (env: BD_API_KEY + BD_ZONE)
        Works from GitHub Actions.  Costs ~$1 / 1 000 requests.
        Set both vars as GitHub Actions secrets to enable.
+       Fetches quantities 1–4 in parallel per event; keeps the lowest price
+       and records which quantity achieved it (best_qty) so buy links open
+       with the right filter pre-selected.
 
   2. macOS off-screen Chrome via AppleScript (env: no extra vars, darwin only)
        Drives the user's real Chrome (inheriting its DataDome session cookies).
@@ -23,7 +26,8 @@ import re
 import subprocess
 import sys
 import time
-from typing import Dict, List, Optional
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from typing import Dict, List, Optional, Tuple
 
 import requests
 
@@ -54,20 +58,18 @@ _EVENTS: List[Dict] = [
     },
 ]
 
-# quantity=1 captures the absolute cheapest per-ticket price across all listings,
-# including single-ticket listings that would be filtered out by quantity=2.
-# sort=price ensures cheapest seats appear first.
-_QTY = "1"
+# Quantities to try in parallel.  SeatGeek filters listings by the minimum
+# number of tickets that can be purchased together, so different quantities
+# can yield different (sometimes lower) cheapest prices.
+_QTYS = ["1", "2", "3", "4"]
 
 # ── BrightData config ───────────────────────────────────────────────────────────
-# Set BD_API_KEY and BD_ZONE as GitHub Actions secrets (and in .env for local runs).
-# BD_ZONE is the zone name shown in your BrightData dashboard (e.g. "web_unlocker1").
 _BD_API_KEY = os.environ.get("BD_API_KEY", "")
 _BD_ZONE    = os.environ.get("BD_ZONE", "")
 _BD_URL     = "https://api.brightdata.com/request"
 
 # ── macOS Chrome config ─────────────────────────────────────────────────────────
-_PAGE_WAIT = 14           # seconds to wait for React to render
+_PAGE_WAIT = 14
 _OFF_X1, _OFF_Y1, _OFF_X2, _OFF_Y2 = -3000, -3000, -2200, -2200
 
 _JS_EXTRACT = r"""
@@ -117,9 +119,9 @@ def search(query: str, client_id: str = "") -> List[Dict]:
 
 # ── BrightData path ─────────────────────────────────────────────────────────────
 
-def _scrape_brightdata(ev: dict) -> Dict:
-    """Fetch one SeatGeek event page via BrightData Web Unlocker REST API."""
-    url = f"{ev['url']}?quantity={_QTY}&sort=price"
+def _fetch_qty(ev: dict, qty: str) -> Tuple[str, Optional[float], Optional[int], bool]:
+    """Fetch one event+quantity via BrightData. Returns (qty, price, listing_count, all_in)."""
+    url = f"{ev['url']}?quantity={qty}&sort=price"
     try:
         resp = requests.post(
             _BD_URL,
@@ -127,32 +129,71 @@ def _scrape_brightdata(ev: dict) -> Dict:
                 "Authorization": f"Bearer {_BD_API_KEY}",
                 "Content-Type":  "application/json",
             },
-            json={
-                "url":    url,
-                "zone":   _BD_ZONE,
-                "format": "raw",
-            },
+            json={"url": url, "zone": _BD_ZONE, "format": "raw"},
             timeout=90,
         )
         if resp.status_code != 200:
-            print(f"[SeatGeek/BD] HTTP {resp.status_code} for {ev['name'][:45]}: {resp.text[:120]}")
-            return _null_row(ev)
-
-        html = resp.text
-        return _parse_html(ev, html)
-
+            print(f"[SeatGeek/BD] HTTP {resp.status_code} qty={qty} for {ev['name'][:40]}: {resp.text[:80]}")
+            return qty, None, None, False
+        price, listing_count, all_in = _parse_price(resp.text)
+        return qty, price, listing_count, all_in
     except requests.RequestException as exc:
-        print(f"[SeatGeek/BD] Request error for {ev['name'][:45]}: {exc}")
+        print(f"[SeatGeek/BD] Request error qty={qty} for {ev['name'][:40]}: {exc}")
+        return qty, None, None, False
+
+
+def _scrape_brightdata(ev: dict) -> Dict:
+    """Fetch quantities 1–4 in parallel; return the row with the best (lowest) price."""
+    with ThreadPoolExecutor(max_workers=len(_QTYS)) as executor:
+        futures = [executor.submit(_fetch_qty, ev, qty) for qty in _QTYS]
+        results = [f.result() for f in futures]
+
+    best_qty: Optional[str] = None
+    best_price: Optional[float] = None
+    best_listing_count: Optional[int] = None
+    best_all_in = False
+
+    for qty, price, listing_count, all_in in results:
+        if price is not None and (best_price is None or price < best_price):
+            best_price = price
+            best_qty = qty
+            best_listing_count = listing_count
+            best_all_in = all_in
+
+    # Log all quantities for visibility
+    price_by_qty = {qty: price for qty, price, _, __ in results}
+    qty_log = "  ".join(
+        f"qty{q}=${price_by_qty[q]:.0f}" if price_by_qty[q] is not None else f"qty{q}=—"
+        for q in _QTYS
+    )
+    if best_price is not None:
+        print(f"[SeatGeek/BD] {ev['name'][:45]:45s}  {qty_log}  → best ${best_price:.0f} (qty={best_qty})")
+    else:
+        print(f"[SeatGeek/BD] {ev['name'][:45]:45s}  all quantities blocked/no price")
         return _null_row(ev)
 
+    return {
+        "platform":      "SeatGeek",
+        "event":         ev["name"],
+        "date":          ev["date"],
+        "venue":         ev["venue"],
+        "url":           ev["url"],
+        "_sg_event_id":  ev.get("_sg_event_id"),
+        "min_price":     best_price,
+        "price_note":    "all-in" if best_all_in else None,
+        "listing_count": best_listing_count,
+        "best_qty":      int(best_qty),
+        "currency":      "USD",
+    }
 
-def _parse_html(ev: dict, html: str) -> Dict:
-    """Extract min price and listing count from SeatGeek page HTML."""
+
+def _parse_price(html: str) -> Tuple[Optional[float], Optional[int], bool]:
+    """Extract (min_price, listing_count, all_in) from SeatGeek page HTML."""
     min_price: Optional[float] = None
     listing_count: Optional[int] = None
     all_in = False
 
-    # --- Primary: __NEXT_DATA__ JSON (most reliable, no DOM parsing) ---
+    # Primary: __NEXT_DATA__ JSON
     m = re.search(r'<script id="__NEXT_DATA__"[^>]*>(.*?)</script>', html, re.DOTALL)
     if m:
         try:
@@ -163,7 +204,6 @@ def _parse_html(ev: dict, html: str) -> Dict:
             if lp is not None and isinstance(lp, (int, float)) and lp > 0:
                 min_price = float(lp)
                 listing_count = stats.get("listing_count") or stats.get("visible_listing_count")
-                # SeatGeek shows all-in prices when these flags are True
                 all_in = bool(
                     sg_event.get("all_in_price_on_event_page") or
                     sg_event.get("all_in_price_before_checkout")
@@ -171,13 +211,12 @@ def _parse_html(ev: dict, html: str) -> Dict:
         except (json.JSONDecodeError, KeyError, TypeError):
             pass
 
-    # --- Fallback: regex price extraction from rendered HTML ---
+    # Fallback: regex
     if min_price is None:
         all_prices = [int(x) for x in re.findall(r'\$(\d{2,4})', html) if 50 <= int(x) <= 9999]
         if all_prices:
             min_price = float(min(all_prices))
 
-    # --- Listing count fallback ---
     if listing_count is None:
         cnt = re.search(r'([\d,]+)\s+listings?', html, re.IGNORECASE)
         if cnt:
@@ -186,30 +225,11 @@ def _parse_html(ev: dict, html: str) -> Dict:
             except ValueError:
                 pass
 
-    # --- True DataDome block: no __NEXT_DATA__ AND no prices ---
+    # True DataDome block: no page data at all
     if min_price is None and "__NEXT_DATA__" not in html:
-        print(f"[SeatGeek/BD] Blocked (no page data) for {ev['name'][:45]}")
-        return _null_row(ev)
+        return None, None, False
 
-    if min_price:
-        note = "all-in" if all_in else None
-        print(f"[SeatGeek/BD] {ev['name'][:50]:50s} ${min_price:.0f} "
-              f"({'all-in, ' if all_in else ''}{listing_count} listings)")
-    else:
-        print(f"[SeatGeek/BD] {ev['name'][:50]:50s} no price found in response")
-
-    return {
-        "platform":      "SeatGeek",
-        "event":         ev["name"],
-        "date":          ev["date"],
-        "venue":         ev["venue"],
-        "url":           ev["url"],
-        "_sg_event_id":  ev.get("_sg_event_id"),
-        "min_price":     min_price,
-        "price_note":    "all-in" if all_in else None,
-        "listing_count": listing_count,
-        "currency":      "USD",
-    }
+    return min_price, listing_count, all_in
 
 
 # ── macOS Chrome path ────────────────────────────────────────────────────────────
@@ -229,7 +249,7 @@ def _chrome_available() -> bool:
 
 def _scrape_chrome(ev: dict) -> Dict:
     """Open one invisible off-screen Chrome window, wait, extract price, close."""
-    url = f"{ev['url']}?quantity={_QTY}&sort=price"
+    url = f"{ev['url']}?quantity=1&sort=price"
     script = (
         'set prevApp to name of (info for (path to frontmost application))\n'
         'tell application "Google Chrome"\n'
