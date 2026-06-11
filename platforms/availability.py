@@ -11,11 +11,15 @@ Only runs when ANTHROPIC_API_KEY is set; falls back to "uncertain" otherwise.
 
 import os
 import re
+import xml.etree.ElementTree as ET
 from datetime import datetime, timezone, timedelta
+from html import unescape
 from typing import Optional
 
 import requests
 from bs4 import BeautifulSoup
+
+_ATOM = "http://www.w3.org/2005/Atom"
 
 try:
     import anthropic as _anthropic
@@ -28,8 +32,7 @@ _HEADERS = {
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
         "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
     ),
-    "Accept": "text/html,*/*",
-    "Accept-Language": "en-US,en;q=0.9",
+    "Accept": "application/rss+xml, application/xml, */*",
 }
 
 _SOLD_RE = re.compile(
@@ -37,6 +40,7 @@ _SOLD_RE = re.compile(
     r'taken|nevermind|never mind|pulled the listing|off the market)\b',
     re.IGNORECASE,
 )
+_DELETED_RE = re.compile(r'^\s*\[(deleted|removed)\]', re.IGNORECASE)
 _AVAILABLE_RE = re.compile(
     r'\b(still available|still have|dm me|pm me|send offer|message me|lmk|'
     r'reach out|willing to negotiate|open to offers)\b',
@@ -74,7 +78,13 @@ def check(url: str, title: str, body: str = "") -> str:
     if _AVAILABLE_RE.search(title):   # title only — body can be empty for new posts
         return "available"
 
-    page_text = _fetch_post(url)
+    post_body, comments = _fetch_post(url)
+
+    # Post was deleted/removed by author or mods — listing is dead.
+    if post_body is not None and _DELETED_RE.match(post_body):
+        return "sold"
+
+    page_text = " | ".join(filter(None, [post_body, *comments]))
     if page_text and _SOLD_RE.search(page_text):
         return "sold"
 
@@ -82,31 +92,43 @@ def check(url: str, title: str, body: str = "") -> str:
     if not api_key or not _HAS_ANTHROPIC:
         return "uncertain"
 
-    return _llm_check(api_key, title, body, page_text or "")
+    return _llm_check(api_key, title, body, page_text)
 
 
-def _fetch_post(url: str) -> Optional[str]:
+def _fetch_post(url: str) -> tuple[Optional[str], list[str]]:
+    """Fetch the post body and top comments via the comments-page RSS feed.
+
+    Returns (post_body, [comment_texts]). post_body is None on fetch failure.
+    """
     if not url or "reddit.com" not in url:
-        return None
+        return None, []
     try:
-        old_url = url.replace("www.reddit.com", "old.reddit.com")
-        for target in (old_url, url):
-            r = requests.get(target, headers=_HEADERS, timeout=15, allow_redirects=True)
-            if r.status_code == 200:
-                break
-        else:
-            return None
+        # Reddit 403s on /.rss when the URL slug is present — strip it down
+        # to /comments/<post_id>/.rss
+        m = re.search(r'/comments/([a-z0-9]+)', url)
+        if not m:
+            return None, []
+        rss_url = re.sub(r'(/comments/[a-z0-9]+).*', r'\1/.rss', url)
+        r = requests.get(rss_url, headers=_HEADERS, timeout=15)
+        if r.status_code != 200:
+            return None, []
 
-        soup = BeautifulSoup(r.text, "lxml")
-        parts = []
-        for div in soup.find_all("div", class_=re.compile(r"usertext-body|md|comment")):
-            t = div.get_text(" ", strip=True)
-            if t:
-                parts.append(t)
-        return " | ".join(parts[:10]) if parts else None
+        root = ET.fromstring(r.text)
+        entries = root.findall(f"{{{_ATOM}}}entry")
+        if not entries:
+            return None, []
+
+        texts = []
+        for entry in entries:
+            content_el = entry.find(f"{{{_ATOM}}}content")
+            raw = unescape(content_el.text) if content_el is not None and content_el.text else ""
+            text = BeautifulSoup(raw, "lxml").get_text(" ", strip=True) if raw else ""
+            texts.append(text)
+
+        return texts[0], texts[1:11]
     except Exception as e:
         print(f"[availability] Fetch error {url}: {e}")
-        return None
+        return None, []
 
 
 def _llm_check(api_key: str, title: str, body: str, page: str) -> str:

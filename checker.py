@@ -172,6 +172,23 @@ def main() -> None:
             **extras,
         }
 
+    # Re-check availability for Reddit posts that dropped out of this cycle's
+    # search results (e.g. deleted/removed posts no longer appear in search,
+    # so they'd never be re-checked via the loop above).
+    seen_keys = {make_key(l) for l in listings}
+    for key, prev in history.items():
+        if not prev.get("platform", "").lower().startswith("reddit"):
+            continue
+        if key in seen_keys:
+            continue
+        if not availability.should_recheck(prev):
+            continue
+        av_status = availability.check(prev.get("url", ""), prev.get("event", ""), "")
+        label = {"sold": "SOLD", "available": "LIVE", "uncertain": "?"}.get(av_status, "?")
+        print(f"  availability [{label}] {prev['event'][:55]} (stale)")
+        prev["availability"] = av_status
+        prev["av_checked_at"] = now
+
     save_history(history)
     append_log(listings, now)
 

@@ -659,7 +659,7 @@ function renderPlatRow(plat, rows, history) {
 
 // ── Render Reddit posts ───────────────────────────────────────────────────────
 function renderReddit(rows) {
-  const redditRows = rows.filter(r => r.platform.toLowerCase().includes('reddit'));
+  const redditRows = rows.filter(r => r.platform.toLowerCase().includes('reddit') && r.availability !== 'sold');
   const dismissed = getDismissed();
   const logo = `<img src="${platLogo('reddit.com')}" alt="Reddit">`;
 
