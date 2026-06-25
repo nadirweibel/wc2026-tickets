@@ -9,7 +9,7 @@
     "last_price": 320.0,
     "last_checked": "2026-06-07T23:13:41.368294+00:00",
     "availability": "uncertain",
-    "av_checked_at": "2026-06-25T01:17:28.054641+00:00",
+    "av_checked_at": "2026-06-25T00:04:23.266714+00:00",
     "body": ""
   },
   "Reddit r/WorldCup2026Tickets|4 Tickets Switzerland vs Bosnia - $375 each, Category 1||1tysqq8": {
@@ -22,7 +22,7 @@
     "last_price": 375.0,
     "last_checked": "2026-06-07T23:13:41.368294+00:00",
     "availability": "uncertain",
-    "av_checked_at": "2026-06-25T01:17:28.054641+00:00",
+    "av_checked_at": "2026-06-25T00:04:23.266714+00:00",
     "body": ""
   },
   "Reddit r/WorldCup2026Tickets|Still have ticket for Switzerland vs qatar it's bleachers I'm more than likely going but if anyone is interested lmk $22||1twp5ti": {
@@ -35,7 +35,7 @@
     "last_price": 220.0,
     "last_checked": "2026-06-07T02:59:39.889225+00:00",
     "availability": "available",
-    "av_checked_at": "2026-06-25T01:17:28.054641+00:00"
+    "av_checked_at": "2026-06-25T00:04:23.266714+00:00"
   },
   "Reddit r/WorldCup2026Tickets|New Zealand / Iran June 15th - Category 1 tickets. $535USD each||1typr6l": {
     "event": "New Zealand / Iran June 15th - Category 1 tickets. $535USD each",
@@ -47,7 +47,7 @@
     "last_price": 535.0,
     "last_checked": "2026-06-07T02:48:28.803731+00:00",
     "availability": "uncertain",
-    "av_checked_at": "2026-06-25T01:17:28.054641+00:00"
+    "av_checked_at": "2026-06-25T00:04:23.266714+00:00"
   },
   "Ticketmaster|World Cup Round of 32: 2A vs. 2B (Match 73)|2026-06-28|": {
     "event": "World Cup Round of 32: 2A vs. 2B (Match 73)",
@@ -57,7 +57,7 @@
     "url": "https://www.ticketmaster.com/event/Z7r9jZ1A7434f",
     "min_seen": 910.26,
     "last_price": 910.26,
-    "last_checked": "2026-06-25T02:21:49.549765+00:00",
+    "last_checked": "2026-06-25T00:04:23.266714+00:00",
     "price_note": "all-in",
     "listing_count": 150,
     "_tm_event_id": "Z7r9jZ1A7434f"
@@ -70,7 +70,7 @@
     "url": "https://www.ticketmaster.com/event/Z7r9jZ1A7434N",
     "min_seen": 1165.32,
     "last_price": 1165.32,
-    "last_checked": "2026-06-25T02:21:49.549765+00:00",
+    "last_checked": "2026-06-25T00:04:23.266714+00:00",
     "price_note": "all-in",
     "listing_count": 110,
     "_tm_event_id": "Z7r9jZ1A7434N"
@@ -83,7 +83,7 @@
     "url": "https://www.ticketmaster.com/event/Z7r9jZ1A7434U",
     "min_seen": 1858.78,
     "last_price": 1858.78,
-    "last_checked": "2026-06-25T02:21:49.549765+00:00",
+    "last_checked": "2026-06-25T00:04:23.266714+00:00",
     "price_note": "all-in",
     "listing_count": 236,
     "_tm_event_id": "Z7r9jZ1A7434U"
@@ -95,10 +95,10 @@
     "venue": "Levi's Stadium",
     "url": "https://seatgeek.com/fifa-world-cup-tickets/international-soccer/2026-06-13-12-pm/17171556",
     "min_seen": 291.0,
-    "last_price": 399.0,
-    "last_checked": "2026-06-25T02:21:49.549765+00:00",
+    "last_price": 378.0,
+    "last_checked": "2026-06-25T00:04:23.266714+00:00",
     "price_note": "all-in",
-    "listing_count": 220,
+    "listing_count": 101,
     "_sg_event_id": "17171556",
     "best_qty": 1
   },
@@ -109,12 +109,12 @@
     "venue": "SoFi Stadium",
     "url": "https://seatgeek.com/fifa-world-cup-tickets/international-soccer/2026-06-18-12-pm/17176205",
     "min_seen": 337.0,
-    "last_price": 521.0,
-    "last_checked": "2026-06-25T02:21:49.549765+00:00",
+    "last_price": 604.0,
+    "last_checked": "2026-06-25T00:04:23.266714+00:00",
     "price_note": "all-in",
-    "listing_count": 221,
+    "listing_count": 192,
     "_sg_event_id": "17176205",
-    "best_qty": 2
+    "best_qty": 3
   },
   "SeatGeek|Canada vs Switzerland - World Cup - Match 51 (Group B)|2026-06-24T12:00:00|": {
     "event": "Canada vs Switzerland - World Cup - Match 51 (Group B)",
@@ -122,13 +122,13 @@
     "date": "2026-06-24T12:00:00",
     "venue": "BC Place Stadium",
     "url": "https://seatgeek.com/fifa-world-cup-tickets/international-soccer/2026-06-24-12-pm/17249641",
-    "min_seen": 559.0,
-    "last_price": 735.0,
-    "last_checked": "2026-06-25T02:21:49.549765+00:00",
+    "min_seen": 520.0,
+    "last_price": 665.0,
+    "last_checked": "2026-06-25T00:04:23.266714+00:00",
     "price_note": "all-in",
-    "listing_count": 214,
+    "listing_count": 203,
     "_sg_event_id": "17249641",
-    "best_qty": 1
+    "best_qty": 4
   },
   "Reddit r/WorldCup2026Tickets|Selling: Switzerland vs. Bosnia and Herzegovina. June 18th 12pm. Sec 315. Row 8, Seat 1 - $400 (Face Value)||1tx25ta": {
     "event": "Selling: Switzerland vs. Bosnia and Herzegovina. June 18th 12pm. Sec 315. Row 8, Seat 1 - $400 (Face Value)",
@@ -140,7 +140,7 @@
     "last_price": 400.0,
     "last_checked": "2026-06-07T07:03:20.254113+00:00",
     "availability": "uncertain",
-    "av_checked_at": "2026-06-25T01:17:28.054641+00:00",
+    "av_checked_at": "2026-06-25T00:04:23.266714+00:00",
     "body": ""
   },
   "VividSeats|Qatar vs Switzerland - World Cup - Match 8 (Group B)|2026-06-13T12:00:00|": {
@@ -150,12 +150,12 @@
     "venue": "Levi's Stadium",
     "url": "https://www.vividseats.com/world-cup-soccer-tickets-levis-stadium-6-13-2026--sports-soccer/production/5080444",
     "min_seen": 212.8,
-    "last_price": 405.24,
-    "last_checked": "2026-06-13T03:52:15.953842+00:00",
+    "last_price": 348.86,
+    "last_checked": "2026-06-13T15:29:15.952728+00:00",
     "price_note": "all-in",
-    "listing_count": 137,
-    "ticket_count": 417,
-    "base_price": 299.0,
+    "listing_count": 82,
+    "ticket_count": 267,
+    "base_price": 257.0,
     "_vs_id": "5080444",
     "best_qty": 1
   },
@@ -167,10 +167,10 @@
     "url": "https://www.vividseats.com/world-cup-soccer-tickets-sofi-stadium-6-18-2026--sports-soccer/production/5080473",
     "min_seen": 224.2,
     "last_price": 1853.37,
-    "last_checked": "2026-06-18T17:37:09.661293+00:00",
+    "last_checked": "2026-06-18T19:23:26.314940+00:00",
     "price_note": "all-in",
-    "listing_count": 35,
-    "ticket_count": 125,
+    "listing_count": 4,
+    "ticket_count": 18,
     "base_price": 1372.0,
     "_vs_id": "5080473",
     "best_qty": 1
@@ -182,12 +182,12 @@
     "venue": "BC Place Stadium",
     "url": "https://www.vividseats.com/world-cup-soccer-tickets-bc-place-stadium-6-24-2026--sports-soccer/production/5080604",
     "min_seen": 455.05,
-    "last_price": 907.0,
-    "last_checked": "2026-06-24T16:44:31.707568+00:00",
+    "last_price": 1759.5,
+    "last_checked": "2026-06-24T18:48:21.055629+00:00",
     "price_note": "all-in",
-    "listing_count": 13,
-    "ticket_count": 24,
-    "base_price": 721.0,
+    "listing_count": 1,
+    "ticket_count": 1,
+    "base_price": 1400.0,
     "_vs_id": "5080604",
     "best_qty": 1
   },
@@ -198,12 +198,12 @@
     "venue": "SoFi Stadium",
     "url": "https://www.vividseats.com/world-cup-soccer-tickets-sofi-stadium-6-12-2026--sports-soccer/production/5080437",
     "min_seen": 603.25,
-    "last_price": 1136.87,
-    "last_checked": "2026-06-12T14:26:58.834280+00:00",
+    "last_price": 1562.16,
+    "last_checked": "2026-06-12T20:02:35.750907+00:00",
     "price_note": "all-in",
-    "listing_count": 131,
-    "ticket_count": 354,
-    "base_price": 841.0,
+    "listing_count": 101,
+    "ticket_count": 285,
+    "base_price": 1156.0,
     "_vs_id": "5080437",
     "best_qty": 1
   },
@@ -215,10 +215,10 @@
     "url": "https://www.vividseats.com/world-cup-soccer-tickets-sofi-stadium-6-15-2026--sports-soccer/production/5080456",
     "min_seen": 39.5,
     "last_price": 982.61,
-    "last_checked": "2026-06-15T22:37:24.302316+00:00",
+    "last_checked": "2026-06-15T22:14:09.464709+00:00",
     "price_note": "all-in",
-    "listing_count": 3,
-    "ticket_count": 3,
+    "listing_count": 36,
+    "ticket_count": 119,
     "base_price": 727.0,
     "_vs_id": "5080456",
     "best_qty": 1
@@ -231,7 +231,7 @@
     "url": "https://www.vividseats.com/world-cup-soccer-tickets-sofi-stadium-6-21-2026--sports-soccer/production/5080498",
     "min_seen": 0.0,
     "last_price": 0.0,
-    "last_checked": "2026-06-21T19:14:34.587971+00:00",
+    "last_checked": "2026-06-21T19:22:43.131800+00:00",
     "price_note": "all-in",
     "listing_count": 0,
     "ticket_count": 0,
@@ -246,12 +246,12 @@
     "venue": "SoFi Stadium",
     "url": "https://www.vividseats.com/world-cup-soccer-tickets-sofi-stadium-6-25-2026--sports-soccer/production/5080656",
     "min_seen": 604.0,
-    "last_price": 1205.22,
-    "last_checked": "2026-06-25T02:21:49.549765+00:00",
+    "last_price": 1139.33,
+    "last_checked": "2026-06-25T00:04:23.266714+00:00",
     "price_note": "all-in",
-    "listing_count": 216,
-    "ticket_count": 436,
-    "base_price": 891.0,
+    "listing_count": 256,
+    "ticket_count": 526,
+    "base_price": 843.0,
     "_vs_id": "5080656",
     "best_qty": 1
   },
@@ -263,10 +263,10 @@
     "url": "https://www.vividseats.com/world-cup-soccer-tickets-sofi-stadium-6-28-2026--sports-soccer/production/5080724",
     "min_seen": 511.1,
     "last_price": 1544.02,
-    "last_checked": "2026-06-17T15:20:14.401349+00:00",
+    "last_checked": "2026-06-17T12:51:06.635337+00:00",
     "price_note": "all-in",
-    "listing_count": 365,
-    "ticket_count": 1263,
+    "listing_count": 363,
+    "ticket_count": 1259,
     "base_price": 1142.0,
     "_vs_id": "5080724",
     "best_qty": 1
@@ -278,12 +278,12 @@
     "venue": "SoFi Stadium",
     "url": "https://www.vividseats.com/world-cup-soccer-tickets-sofi-stadium-7-2-2026--sports-soccer/production/5080836",
     "min_seen": 559.55,
-    "last_price": 1825.02,
-    "last_checked": "2026-06-17T16:24:14.825165+00:00",
+    "last_price": 1836.48,
+    "last_checked": "2026-06-17T12:51:06.635337+00:00",
     "price_note": "all-in",
-    "listing_count": 336,
-    "ticket_count": 1163,
-    "base_price": 1351.0,
+    "listing_count": 327,
+    "ticket_count": 1135,
+    "base_price": 1359.0,
     "_vs_id": "5080836",
     "best_qty": 1
   },
@@ -295,10 +295,10 @@
     "url": "https://www.vividseats.com/world-cup-soccer-tickets-sofi-stadium-7-10-2026--sports-soccer/production/5080864",
     "min_seen": 1119.1,
     "last_price": 3096.08,
-    "last_checked": "2026-06-18T17:37:09.661293+00:00",
+    "last_checked": "2026-06-18T19:23:26.314940+00:00",
     "price_note": "all-in",
-    "listing_count": 504,
-    "ticket_count": 1692,
+    "listing_count": 489,
+    "ticket_count": 1671,
     "base_price": 2292.0,
     "_vs_id": "5080864",
     "best_qty": 1
@@ -311,7 +311,7 @@
     "url": "https://www.ticketmaster.com/event/Z7r9jZ1A7433K",
     "min_seen": 468.27,
     "last_price": 468.27,
-    "last_checked": "2026-06-25T02:21:49.549765+00:00",
+    "last_checked": "2026-06-25T00:04:23.266714+00:00",
     "price_note": "all-in",
     "listing_count": 86,
     "_tm_event_id": "Z7r9jZ1A7433K"
@@ -324,7 +324,7 @@
     "url": "https://www.ticketmaster.com/event/Z7r9jZ1A743f3",
     "min_seen": 440.3,
     "last_price": 447.44,
-    "last_checked": "2026-06-25T02:21:49.549765+00:00",
+    "last_checked": "2026-06-25T00:04:23.266714+00:00",
     "price_note": "all-in",
     "listing_count": 144,
     "_tm_event_id": "Z7r9jZ1A743f3"
@@ -337,7 +337,7 @@
     "url": "https://www.ticketmaster.ca/event/Z7r9jZ1A743fg",
     "min_seen": null,
     "last_price": null,
-    "last_checked": "2026-06-25T02:21:49.549765+00:00",
+    "last_checked": "2026-06-25T00:04:23.266714+00:00",
     "_tm_event_id": "Z7r9jZ1A743fg"
   },
   "Ticketmaster|USA vs Paraguay - World Cup - Match 4 (Group D)|2026-06-12|": {
@@ -348,7 +348,7 @@
     "url": "https://www.ticketmaster.com/event/Z7r9jZ1A74333",
     "min_seen": 895.05,
     "last_price": 1010.31,
-    "last_checked": "2026-06-25T02:21:49.549765+00:00",
+    "last_checked": "2026-06-25T00:04:23.266714+00:00",
     "price_note": "all-in",
     "listing_count": 741,
     "_tm_event_id": "Z7r9jZ1A74333"
@@ -361,7 +361,7 @@
     "url": "https://www.ticketmaster.com/event/Z7r9jZ1A743fe",
     "min_seen": 337.96,
     "last_price": 337.96,
-    "last_checked": "2026-06-25T02:21:49.549765+00:00",
+    "last_checked": "2026-06-25T00:04:23.266714+00:00",
     "price_note": "all-in",
     "listing_count": 271,
     "_tm_event_id": "Z7r9jZ1A743fe"
@@ -374,7 +374,7 @@
     "url": "https://www.ticketmaster.com/event/Z7r9jZ1A743fN",
     "min_seen": 377.23,
     "last_price": 516.46,
-    "last_checked": "2026-06-25T02:21:49.549765+00:00",
+    "last_checked": "2026-06-25T00:04:23.266714+00:00",
     "price_note": "all-in",
     "listing_count": 104,
     "_tm_event_id": "Z7r9jZ1A743fN"
@@ -387,7 +387,7 @@
     "url": "https://www.ticketmaster.com/event/Z7r9jZ1A7434Z",
     "min_seen": 949.62,
     "last_price": 965.58,
-    "last_checked": "2026-06-25T02:21:49.549765+00:00",
+    "last_checked": "2026-06-25T00:04:23.266714+00:00",
     "price_note": "all-in",
     "listing_count": 101,
     "_tm_event_id": "Z7r9jZ1A7434Z"
@@ -402,7 +402,7 @@
     "last_price": 1400.0,
     "last_checked": "2026-06-07T18:55:37.665942+00:00",
     "availability": "uncertain",
-    "av_checked_at": "2026-06-25T01:17:28.054641+00:00",
+    "av_checked_at": "2026-06-25T00:04:23.266714+00:00",
     "body": ""
   },
   "StubHub|Qatar vs Switzerland - World Cup - Group B (Match 8)|2026-06-13|": {
@@ -411,12 +411,12 @@
     "date": "2026-06-13",
     "venue": "Levi's Stadium",
     "url": "https://www.stubhub.com/world-cup-santa-clara-tickets-6-13-2026/event/153020611/",
-    "min_seen": 57,
-    "last_price": 330,
-    "last_checked": "2026-06-25T02:21:49.549765+00:00",
+    "min_seen": 50,
+    "last_price": 303,
+    "last_checked": "2026-06-25T00:04:23.266714+00:00",
     "price_note": "all-in",
-    "listing_count": 189,
-    "best_qty": 1
+    "listing_count": 65,
+    "best_qty": 4
   },
   "StubHub|Switzerland vs Bosnia-Herzegovina - World Cup - Match 26 (Group B)|2026-06-18|": {
     "event": "Switzerland vs Bosnia-Herzegovina - World Cup - Match 26 (Group B)",
@@ -425,11 +425,10 @@
     "venue": "SoFi Stadium",
     "url": "https://www.stubhub.com/world-cup-inglewood-tickets-6-18-2026/event/153020716/",
     "min_seen": 219,
-    "last_price": 289,
-    "last_checked": "2026-06-25T02:21:49.549765+00:00",
+    "last_price": 440,
+    "last_checked": "2026-06-25T00:04:23.266714+00:00",
     "price_note": "all-in",
-    "listing_count": 320,
-    "best_qty": 2
+    "best_qty": 1
   },
   "StubHub|Canada vs Switzerland - World Cup - Match 51 (Group B)|2026-06-24|": {
     "event": "Canada vs Switzerland - World Cup - Match 51 (Group B)",
@@ -438,10 +437,9 @@
     "venue": "BC Place Stadium",
     "url": "https://www.stubhub.com/world-cup-vancouver-tickets-6-24-2026/event/153020467/",
     "min_seen": 452,
-    "last_price": 452,
-    "last_checked": "2026-06-25T02:21:49.549765+00:00",
+    "last_price": 706,
+    "last_checked": "2026-06-25T00:04:23.266714+00:00",
     "price_note": "all-in",
-    "listing_count": 179,
     "best_qty": 1
   },
   "StubHub|USA vs Paraguay - World Cup - Match 4 (Group D)|2026-06-12|": {
@@ -451,10 +449,10 @@
     "venue": "SoFi Stadium",
     "url": "https://www.stubhub.com/world-cup-inglewood-tickets-6-12-2026/event/153020709/",
     "min_seen": 597,
-    "last_price": 861,
-    "last_checked": "2026-06-25T02:21:49.549765+00:00",
+    "last_price": 987,
+    "last_checked": "2026-06-25T00:04:23.266714+00:00",
     "price_note": "all-in",
-    "listing_count": 434,
+    "listing_count": 151,
     "best_qty": 1
   },
   "StubHub|Iran vs New Zealand - World Cup - Match 15 (Group G)|2026-06-15|": {
@@ -464,10 +462,10 @@
     "venue": "SoFi Stadium",
     "url": "https://www.stubhub.com/world-cup-inglewood-tickets-6-15-2026/event/153020712/",
     "min_seen": 193,
-    "last_price": 262,
-    "last_checked": "2026-06-25T02:21:49.549765+00:00",
+    "last_price": 431,
+    "last_checked": "2026-06-25T00:04:23.266714+00:00",
     "price_note": "all-in",
-    "listing_count": 337,
+    "listing_count": 139,
     "best_qty": 1
   },
   "StubHub|Belgium vs Iran - World Cup - Match 39 (Group G)|2026-06-21|": {
@@ -477,10 +475,10 @@
     "venue": "SoFi Stadium",
     "url": "https://www.stubhub.com/world-cup-inglewood-tickets-6-21-2026/event/153020717/",
     "min_seen": 311,
-    "last_price": 358,
-    "last_checked": "2026-06-25T02:21:49.549765+00:00",
+    "last_price": 715,
+    "last_checked": "2026-06-25T00:04:23.266714+00:00",
     "price_note": "all-in",
-    "listing_count": 288,
+    "listing_count": 66,
     "best_qty": 1
   },
   "StubHub|USA vs Turkey - World Cup - Match 59 (Group D)|2026-06-25|": {
@@ -490,10 +488,10 @@
     "venue": "SoFi Stadium",
     "url": "https://www.stubhub.com/world-cup-inglewood-tickets-6-25-2026/event/153020718/",
     "min_seen": 725,
-    "last_price": 888,
-    "last_checked": "2026-06-25T02:21:49.549765+00:00",
+    "last_price": 945,
+    "last_checked": "2026-06-25T00:04:23.266714+00:00",
     "price_note": "all-in",
-    "listing_count": 241,
+    "listing_count": 162,
     "best_qty": 1
   },
   "StubHub|World Cup Round of 32: 2A vs. 2B (Match 73)|2026-06-28|": {
@@ -503,10 +501,10 @@
     "venue": "SoFi Stadium",
     "url": "https://www.stubhub.com/world-cup-inglewood-tickets-6-28-2026/event/153020724/",
     "min_seen": 694,
-    "last_price": 827,
-    "last_checked": "2026-06-25T02:21:49.549765+00:00",
+    "last_price": 966,
+    "last_checked": "2026-06-25T00:04:23.266714+00:00",
     "price_note": "all-in",
-    "listing_count": 354,
+    "listing_count": 358,
     "best_qty": 2
   },
   "StubHub|World Cup Round of 32: 1H vs. 2J (Match 84)|2026-07-02|": {
@@ -516,10 +514,10 @@
     "venue": "SoFi Stadium",
     "url": "https://www.stubhub.com/world-cup-inglewood-tickets-7-2-2026/event/153020726/",
     "min_seen": 805,
-    "last_price": 923,
-    "last_checked": "2026-06-25T02:21:49.549765+00:00",
+    "last_price": 972,
+    "last_checked": "2026-06-25T00:04:23.266714+00:00",
     "price_note": "all-in",
-    "listing_count": 211,
+    "listing_count": 205,
     "best_qty": 1
   },
   "Reddit r/WorldCup2026Tickets|Selling 2 category 1 tickets for Switzerland Vs Qatar game at Levi\u2019s stadium. $500/ticket. Final offer.||1tzglge": {
@@ -532,7 +530,7 @@
     "last_price": 500.0,
     "last_checked": "2026-06-07T16:54:46.082663+00:00",
     "availability": "uncertain",
-    "av_checked_at": "2026-06-25T01:17:28.054641+00:00",
+    "av_checked_at": "2026-06-25T00:04:23.266714+00:00",
     "body": ""
   },
   "Reddit r/WorldCup2026Tickets|Selling a M52 Bosnia&Herzegovina vs Switzerland Cat1 ticket below $200!||1tzz2nw": {
@@ -545,7 +543,7 @@
     "last_price": 200.0,
     "last_checked": "2026-06-08T12:20:36.260688+00:00",
     "availability": "uncertain",
-    "av_checked_at": "2026-06-25T01:17:28.054641+00:00",
+    "av_checked_at": "2026-06-25T00:04:23.266714+00:00",
     "body": ""
   },
   "Reddit r/WorldCup2026Tickets|$150 Los Angeles Stadium (SoFi) Parking Passes \u2013 PS-2 Covered Garage||1u017tg": {
@@ -558,7 +556,7 @@
     "last_price": 150.0,
     "last_checked": "2026-06-08T15:29:55.459994+00:00",
     "availability": "uncertain",
-    "av_checked_at": "2026-06-25T01:17:28.054641+00:00",
+    "av_checked_at": "2026-06-25T00:04:23.266714+00:00",
     "body": ""
   },
   "Reddit r/WorldCup2026Tickets|Qatar Vs Switzerland Category 1 :::::::2 tickets - $750||1u0ep78": {
@@ -571,7 +569,7 @@
     "last_price": 750.0,
     "last_checked": "2026-06-08T20:07:36.750031+00:00",
     "availability": "uncertain",
-    "av_checked_at": "2026-06-25T01:17:28.054641+00:00",
+    "av_checked_at": "2026-06-25T00:04:23.266714+00:00",
     "body": ""
   },
   "Reddit r/WorldCup2026Tickets|Selling 2 Cat 1 tickets Qatar Vs Switzerland. Great seats! $500 each (below face value)||1u1cy8n": {
@@ -584,7 +582,7 @@
     "last_price": 500.0,
     "last_checked": "2026-06-09T20:01:41.867177+00:00",
     "availability": "uncertain",
-    "av_checked_at": "2026-06-25T01:17:28.054641+00:00",
+    "av_checked_at": "2026-06-25T00:04:23.266714+00:00",
     "body": ""
   },
   "Reddit r/WorldCup2026Tickets|Selling 2x Tickets to Qatar vs Switzerland $550 Each (FV)||1u1mmz2": {
@@ -597,7 +595,7 @@
     "last_price": 550.0,
     "last_checked": "2026-06-10T05:13:04.135632+00:00",
     "availability": "uncertain",
-    "av_checked_at": "2026-06-25T01:17:28.054641+00:00",
+    "av_checked_at": "2026-06-25T00:04:23.266714+00:00",
     "body": ""
   },
   "Reddit r/WorldCup2026Tickets|M8 Santa Clara, June 13 Switzerland v Qatar Cat. 2 Block 130 - Row 24 - Seats 21&22 $680 for pair||1u2a3bi": {
@@ -610,7 +608,7 @@
     "last_price": 680.0,
     "last_checked": "2026-06-10T19:31:05.477402+00:00",
     "availability": "uncertain",
-    "av_checked_at": "2026-06-25T01:17:28.054641+00:00",
+    "av_checked_at": "2026-06-25T00:04:23.266714+00:00",
     "body": ""
   },
   "Reddit r/WorldCup2026Tickets|Selling 2 Qatar vs Switzerland tickets, $150 each, price negotiable. I am no longer able to attend. Section 420||1u2t5dr": {
@@ -623,7 +621,7 @@
     "last_price": 150.0,
     "last_checked": "2026-06-11T15:34:56.308189+00:00",
     "availability": "uncertain",
-    "av_checked_at": "2026-06-25T01:17:28.054641+00:00",
+    "av_checked_at": "2026-06-25T00:04:23.266714+00:00",
     "body": ""
   },
   "Reddit r/WorldCup2026Tickets|Selling Switzerland - Bosnia 4 Tickets Section 232 $500ea||1u2qjv0": {
@@ -636,7 +634,7 @@
     "last_price": 500.0,
     "last_checked": "2026-06-11T12:40:18.815995+00:00",
     "availability": "uncertain",
-    "av_checked_at": "2026-06-25T01:17:28.054641+00:00",
+    "av_checked_at": "2026-06-25T00:04:23.266714+00:00",
     "body": ""
   },
   "Reddit r/WorldCup2026Tickets|SELLING: FIFA World Cup 2026 \u2013 Qatar vs Switzerland Ticket \u2013 Section 204 \u2013 $399.||1u33kmz": {
@@ -647,9 +645,9 @@
     "url": "https://www.reddit.com/r/WorldCup2026Tickets/comments/1u33kmz/selling_fifa_world_cup_2026_qatar_vs_switzerland/",
     "min_seen": 399.0,
     "last_price": 399.0,
-    "last_checked": "2026-06-11T18:46:50.289476+00:00",
+    "last_checked": "2026-06-11T16:48:37.314632+00:00",
     "availability": "uncertain",
-    "av_checked_at": "2026-06-25T01:17:28.054641+00:00",
+    "av_checked_at": "2026-06-25T00:04:23.266714+00:00",
     "body": ""
   },
   "Reddit r/WorldCup2026Tickets|Selling 2 Tickets for Switzerland VS Bosnia and Herzegovina $795||1u335my": {
@@ -660,9 +658,22 @@
     "url": "https://www.reddit.com/r/WorldCup2026Tickets/comments/1u335my/selling_2_tickets_for_switzerland_vs_bosnia_and/",
     "min_seen": 795.0,
     "last_price": 795.0,
-    "last_checked": "2026-06-11T18:46:50.289476+00:00",
+    "last_checked": "2026-06-11T16:48:37.314632+00:00",
     "availability": "uncertain",
-    "av_checked_at": "2026-06-25T01:17:28.054641+00:00",
+    "av_checked_at": "2026-06-25T00:04:23.266714+00:00",
+    "body": ""
+  },
+  "Reddit r/WorldCup2026Tickets|Switzerland v Qatar M8 Santa Clara June 13 Cat. 2 Block 130 - Row 24 - Seat 21 $315||1u3diyz": {
+    "event": "Switzerland v Qatar M8 Santa Clara June 13 Cat. 2 Block 130 - Row 24 - Seat 21 $315",
+    "platform": "Reddit r/WorldCup2026Tickets",
+    "date": "",
+    "venue": "",
+    "url": "https://www.reddit.com/r/WorldCup2026Tickets/comments/1u3diyz/switzerland_v_qatar_m8_santa_clara_june_13_cat_2/",
+    "min_seen": 315.0,
+    "last_price": 315.0,
+    "last_checked": "2026-06-11T23:21:10.941028+00:00",
+    "availability": "uncertain",
+    "av_checked_at": "2026-06-25T00:04:23.266714+00:00",
     "body": ""
   },
   "Reddit r/WorldCup2026Tickets|Selling: USA vs Paraguay World Cup Match 4 at SoFi \u2014 Section 230 \u2014 $1,000||1u3j228": {
@@ -673,9 +684,9 @@
     "url": "https://www.reddit.com/r/WorldCup2026Tickets/comments/1u3j228/selling_usa_vs_paraguay_world_cup_match_4_at_sofi/",
     "min_seen": 1000.0,
     "last_price": 1000.0,
-    "last_checked": "2026-06-12T06:32:45.835557+00:00",
+    "last_checked": "2026-06-12T02:57:50.657949+00:00",
     "availability": "uncertain",
-    "av_checked_at": "2026-06-25T01:17:28.054641+00:00",
+    "av_checked_at": "2026-06-25T00:04:23.266714+00:00",
     "body": ""
   },
   "Reddit r/WorldCup2026Tickets|Selling: USA vs Paraguay World Cup Match 4 at SoFi \u2014 Section 230 \u2014 $1,000||1u3inln": {
@@ -686,22 +697,9 @@
     "url": "https://www.reddit.com/r/WorldCup2026Tickets/comments/1u3inln/selling_usa_vs_paraguay_world_cup_match_4_at_sofi/",
     "min_seen": 1000.0,
     "last_price": 1000.0,
-    "last_checked": "2026-06-12T05:21:56.500050+00:00",
+    "last_checked": "2026-06-12T02:57:50.657949+00:00",
     "availability": "uncertain",
-    "av_checked_at": "2026-06-25T01:17:28.054641+00:00",
-    "body": ""
-  },
-  "Reddit r/WorldCup2026Tickets|One Ticket Switzerland v Qatar M8 June 13 Cat. 2 Block 130 - Row 24 - Seat 21 $270||1u3ws7z": {
-    "event": "One Ticket Switzerland v Qatar M8 June 13 Cat. 2 Block 130 - Row 24 - Seat 21 $270",
-    "platform": "Reddit r/WorldCup2026Tickets",
-    "date": "",
-    "venue": "",
-    "url": "https://www.reddit.com/r/WorldCup2026Tickets/comments/1u3ws7z/one_ticket_switzerland_v_qatar_m8_june_13_cat_2/",
-    "min_seen": 270.0,
-    "last_price": 270.0,
-    "last_checked": "2026-06-12T14:26:58.834280+00:00",
-    "availability": "uncertain",
-    "av_checked_at": "2026-06-25T01:17:28.054641+00:00",
+    "av_checked_at": "2026-06-25T00:04:23.266714+00:00",
     "body": ""
   },
   "Reddit r/WorldCup2026Tickets|Selling 2x USA vs Paraguay World Cup 2026 Tickets - Category 1 - Los Angeles - $1,800 each||1u3ora7": {
@@ -712,22 +710,35 @@
     "url": "https://www.reddit.com/r/WorldCup2026Tickets/comments/1u3ora7/selling_2x_usa_vs_paraguay_world_cup_2026_tickets/",
     "min_seen": 1800.0,
     "last_price": 1800.0,
-    "last_checked": "2026-06-12T14:26:58.834280+00:00",
+    "last_checked": "2026-06-12T14:46:11.313563+00:00",
     "availability": "uncertain",
-    "av_checked_at": "2026-06-25T01:17:28.054641+00:00",
+    "av_checked_at": "2026-06-25T00:04:23.266714+00:00",
     "body": ""
   },
-  "Reddit r/WorldCup2026Tickets|WTB: single ticket Switzerland - Qatar under $150.||1u4um9o": {
-    "event": "WTB: single ticket Switzerland - Qatar under $150.",
+  "Reddit r/WorldCup2026Tickets|One Ticket Switzerland v Qatar M8 June 13 Cat. 2 Block 130 - Row 24 - Seat 21 $270||1u3ws7z": {
+    "event": "One Ticket Switzerland v Qatar M8 June 13 Cat. 2 Block 130 - Row 24 - Seat 21 $270",
     "platform": "Reddit r/WorldCup2026Tickets",
     "date": "",
     "venue": "",
-    "url": "https://www.reddit.com/r/WorldCup2026Tickets/comments/1u4um9o/wtb_single_ticket_switzerland_qatar_under_150/",
-    "min_seen": 150.0,
-    "last_price": 150.0,
-    "last_checked": "2026-06-13T15:49:54.769916+00:00",
+    "url": "https://www.reddit.com/r/WorldCup2026Tickets/comments/1u3ws7z/one_ticket_switzerland_v_qatar_m8_june_13_cat_2/",
+    "min_seen": 270.0,
+    "last_price": 270.0,
+    "last_checked": "2026-06-12T17:35:17.502593+00:00",
     "availability": "uncertain",
-    "av_checked_at": "2026-06-25T01:17:28.054641+00:00",
+    "av_checked_at": "2026-06-25T00:04:23.266714+00:00",
+    "body": ""
+  },
+  "Reddit r/WorldCup2026Tickets|June 13: Switzerland vs Qatar - Selling 2 Tickets for $700||1u3zq9v": {
+    "event": "June 13: Switzerland vs Qatar - Selling 2 Tickets for $700",
+    "platform": "Reddit r/WorldCup2026Tickets",
+    "date": "",
+    "venue": "",
+    "url": "https://www.reddit.com/r/WorldCup2026Tickets/comments/1u3zq9v/june_13_switzerland_vs_qatar_selling_2_tickets/",
+    "min_seen": 700.0,
+    "last_price": 700.0,
+    "last_checked": "2026-06-12T17:35:17.502593+00:00",
+    "availability": "uncertain",
+    "av_checked_at": "2026-06-25T00:04:23.266714+00:00",
     "body": ""
   },
   "Reddit r/WorldCup2026Tickets|Selling 4 - Cat 2 tickets for Switzerland v/s Bosnia and Herzegovina on June 18th Los Angeles. $300 each||1u4w0b6": {
@@ -738,9 +749,48 @@
     "url": "https://www.reddit.com/r/WorldCup2026Tickets/comments/1u4w0b6/selling_4_cat_2_tickets_for_switzerland_vs_bosnia/",
     "min_seen": 300.0,
     "last_price": 300.0,
-    "last_checked": "2026-06-13T19:27:44.589286+00:00",
+    "last_checked": "2026-06-13T19:17:08.104725+00:00",
     "availability": "uncertain",
-    "av_checked_at": "2026-06-25T01:17:28.054641+00:00",
+    "av_checked_at": "2026-06-25T00:04:23.266714+00:00",
+    "body": ""
+  },
+  "Reddit r/WorldCup2026Tickets|wtb 1 ticket qatar v switzerland (max $50)||1u4vps5": {
+    "event": "wtb 1 ticket qatar v switzerland (max $50)",
+    "platform": "Reddit r/WorldCup2026Tickets",
+    "date": "",
+    "venue": "",
+    "url": "https://www.reddit.com/r/WorldCup2026Tickets/comments/1u4vps5/wtb_1_ticket_qatar_v_switzerland_max_50/",
+    "min_seen": 50.0,
+    "last_price": 50.0,
+    "last_checked": "2026-06-13T17:17:23.874266+00:00",
+    "availability": "uncertain",
+    "av_checked_at": "2026-06-25T00:04:23.266714+00:00",
+    "body": ""
+  },
+  "Reddit r/WorldCup2026Tickets|Need 4 tickets Qatar vs Switzerland $50 max for each||1u4vm8b": {
+    "event": "Need 4 tickets Qatar vs Switzerland $50 max for each",
+    "platform": "Reddit r/WorldCup2026Tickets",
+    "date": "",
+    "venue": "",
+    "url": "https://www.reddit.com/r/WorldCup2026Tickets/comments/1u4vm8b/need_4_tickets_qatar_vs_switzerland_50_max_for/",
+    "min_seen": 50.0,
+    "last_price": 50.0,
+    "last_checked": "2026-06-13T17:17:23.874266+00:00",
+    "availability": "uncertain",
+    "av_checked_at": "2026-06-25T00:04:23.266714+00:00",
+    "body": ""
+  },
+  "Reddit r/WorldCup2026Tickets|WTB: single ticket Switzerland - Qatar under $150.||1u4um9o": {
+    "event": "WTB: single ticket Switzerland - Qatar under $150.",
+    "platform": "Reddit r/WorldCup2026Tickets",
+    "date": "",
+    "venue": "",
+    "url": "https://www.reddit.com/r/WorldCup2026Tickets/comments/1u4um9o/wtb_single_ticket_switzerland_qatar_under_150/",
+    "min_seen": 150.0,
+    "last_price": 150.0,
+    "last_checked": "2026-06-13T17:17:23.874266+00:00",
+    "availability": "uncertain",
+    "av_checked_at": "2026-06-25T00:04:23.266714+00:00",
     "body": ""
   },
   "Reddit r/WorldCup2026Tickets|Selling 2 Tickets on FIFA Resale. Switzerland vs Bosnia June 18, LA Category 1 - $730 each||1u5byyg": {
@@ -751,9 +801,9 @@
     "url": "https://www.reddit.com/r/WorldCup2026Tickets/comments/1u5byyg/selling_2_tickets_on_fifa_resale_switzerland_vs/",
     "min_seen": 730.0,
     "last_price": 730.0,
-    "last_checked": "2026-06-14T04:59:25.889035+00:00",
+    "last_checked": "2026-06-14T05:27:53.942573+00:00",
     "availability": "uncertain",
-    "av_checked_at": "2026-06-25T01:17:28.054641+00:00",
+    "av_checked_at": "2026-06-25T00:04:23.266714+00:00",
     "body": ""
   },
   "Reddit r/WorldCup2026Tickets|My $120 ticket to Switzerland vs Qatar||1u64o19": {
@@ -764,9 +814,9 @@
     "url": "https://www.reddit.com/r/WorldCup2026Tickets/comments/1u64o19/my_120_ticket_to_switzerland_vs_qatar/",
     "min_seen": 120.0,
     "last_price": 120.0,
-    "last_checked": "2026-06-15T05:38:25.269061+00:00",
+    "last_checked": "2026-06-15T09:56:50.648570+00:00",
     "availability": "uncertain",
-    "av_checked_at": "2026-06-25T01:17:28.054641+00:00",
+    "av_checked_at": "2026-06-25T00:04:23.266714+00:00",
     "body": ""
   },
   "Reddit r/WorldCup2026Tickets|[SELLING] 2x FIFA World Cup 2026 Hospitality Tickets -- Iran vs New Zealand -- SoFi Stadium -- June 15 -- $4,500 each||1u64kpa": {
@@ -777,9 +827,9 @@
     "url": "https://www.reddit.com/r/WorldCup2026Tickets/comments/1u64kpa/selling_2x_fifa_world_cup_2026_hospitality/",
     "min_seen": 4500.0,
     "last_price": 4500.0,
-    "last_checked": "2026-06-15T05:38:25.269061+00:00",
+    "last_checked": "2026-06-15T09:56:50.648570+00:00",
     "availability": "uncertain",
-    "av_checked_at": "2026-06-25T01:17:28.054641+00:00",
+    "av_checked_at": "2026-06-25T00:04:23.266714+00:00",
     "body": ""
   },
   "VividSeats|2026 FIFA World Cup - Canada vs. Switzerland Watch Party|2026-06-24T13:00:00|": {
@@ -790,7 +840,7 @@
     "url": "https://www.vividseats.com/world-cup-soccer-watch-party-tickets-deerfoot-inn-and-casino-6-24-2026--sports-other-sports/production/7131165",
     "min_seen": 30.57,
     "last_price": 30.57,
-    "last_checked": "2026-06-24T06:24:34.928156+00:00",
+    "last_checked": "2026-06-24T06:42:05.450289+00:00",
     "price_note": "all-in",
     "listing_count": 1,
     "ticket_count": 8,
@@ -806,9 +856,9 @@
     "url": "https://www.reddit.com/r/WorldCup2026Tickets/comments/1u73ywm/my_415_ticket_view_switzerland_vs_qatar/",
     "min_seen": 415.0,
     "last_price": 415.0,
-    "last_checked": "2026-06-16T07:08:39.023952+00:00",
+    "last_checked": "2026-06-16T12:08:44.266649+00:00",
     "availability": "uncertain",
-    "av_checked_at": "2026-06-25T01:17:28.054641+00:00",
+    "av_checked_at": "2026-06-25T00:04:23.266714+00:00",
     "body": ""
   },
   "Reddit r/WorldCup2026Tickets|2 Tix Bosnia vs Switzerland Club Level C242 Row 5 $800/Each||1u7hy1t": {
@@ -819,22 +869,9 @@
     "url": "https://www.reddit.com/r/WorldCup2026Tickets/comments/1u7hy1t/2_tix_bosnia_vs_switzerland_club_level_c242_row_5/",
     "min_seen": 800.0,
     "last_price": 800.0,
-    "last_checked": "2026-06-16T17:15:35.186888+00:00",
+    "last_checked": "2026-06-16T18:00:01.273987+00:00",
     "availability": "uncertain",
-    "av_checked_at": "2026-06-25T01:17:28.054641+00:00",
-    "body": ""
-  },
-  "Reddit r/WorldCup2026Tickets|Selling 2x Switzerland v Bosnia CAT2 tickets - $500 each||1u7u02a": {
-    "event": "Selling 2x Switzerland v Bosnia CAT2 tickets - $500 each",
-    "platform": "Reddit r/WorldCup2026Tickets",
-    "date": "",
-    "venue": "",
-    "url": "https://www.reddit.com/r/WorldCup2026Tickets/comments/1u7u02a/selling_2x_switzerland_v_bosnia_cat2_tickets_500/",
-    "min_seen": 500.0,
-    "last_price": 500.0,
-    "last_checked": "2026-06-16T23:38:57.869866+00:00",
-    "availability": "uncertain",
-    "av_checked_at": "2026-06-25T01:17:28.054641+00:00",
+    "av_checked_at": "2026-06-25T00:04:23.266714+00:00",
     "body": ""
   },
   "VividSeats|2026 World Cup - 2A vs 2B - Match 73|2026-06-28T12:00:00|": {
@@ -843,13 +880,13 @@
     "date": "2026-06-28T12:00:00",
     "venue": "SoFi Stadium",
     "url": "https://www.vividseats.com/world-cup-soccer-tickets-sofi-stadium-6-28-2026--sports-soccer/production/5080724",
-    "min_seen": 1168.91,
-    "last_price": 1226.8,
-    "last_checked": "2026-06-24T16:44:31.707568+00:00",
+    "min_seen": 1103.88,
+    "last_price": 1103.88,
+    "last_checked": "2026-06-24T20:44:40.803306+00:00",
     "price_note": "all-in",
-    "listing_count": 773,
-    "ticket_count": 2234,
-    "base_price": 907.0,
+    "listing_count": 790,
+    "ticket_count": 2293,
+    "base_price": 816.0,
     "_vs_id": "5080724",
     "best_qty": 1
   },
@@ -861,10 +898,10 @@
     "url": "https://www.vividseats.com/world-cup-soccer-tickets-sofi-stadium-7-2-2026--sports-soccer/production/5080836",
     "min_seen": 1721.42,
     "last_price": 1978.16,
-    "last_checked": "2026-06-25T02:21:49.549765+00:00",
+    "last_checked": "2026-06-25T00:04:23.266714+00:00",
     "price_note": "all-in",
-    "listing_count": 569,
-    "ticket_count": 1864,
+    "listing_count": 571,
+    "ticket_count": 1871,
     "base_price": 1463.95,
     "_vs_id": "5080836",
     "best_qty": 1
@@ -877,22 +914,9 @@
     "url": "https://www.reddit.com/r/WorldCup2026Tickets/comments/1u8txab/selling_1_ticket_to_switzerland_vs_bosnia_in_la/",
     "min_seen": 350.0,
     "last_price": 350.0,
-    "last_checked": "2026-06-18T05:16:26.684663+00:00",
+    "last_checked": "2026-06-18T02:57:49.045244+00:00",
     "availability": "uncertain",
-    "av_checked_at": "2026-06-25T01:17:28.054641+00:00",
-    "body": ""
-  },
-  "Reddit r/WorldCup2026Tickets|Selling (2) tickets for Face Value $1000/pair For Switzerland vs Bosnia today in L.A | Section C1113 Row 18||1u9cigy": {
-    "event": "Selling (2) tickets for Face Value $1000/pair For Switzerland vs Bosnia today in L.A | Section C1113 Row 18",
-    "platform": "Reddit r/WorldCup2026Tickets",
-    "date": "",
-    "venue": "",
-    "url": "https://www.reddit.com/r/WorldCup2026Tickets/comments/1u9cigy/selling_2_tickets_for_face_value_1000pair_for/",
-    "min_seen": 1000.0,
-    "last_price": 1000.0,
-    "last_checked": "2026-06-18T17:37:09.661293+00:00",
-    "availability": "uncertain",
-    "av_checked_at": "2026-06-25T01:17:28.054641+00:00",
+    "av_checked_at": "2026-06-25T00:04:23.266714+00:00",
     "body": ""
   },
   "Reddit r/WorldCup2026Tickets|Switzerland Vs Bosnia in 3 hours. I will buy any cat 2 tickets for $200 if anyone is desperate to offload. Remember: $20||1u9akv2": {
@@ -903,9 +927,22 @@
     "url": "https://www.reddit.com/r/WorldCup2026Tickets/comments/1u9akv2/switzerland_vs_bosnia_in_3_hours_i_will_buy_any/",
     "min_seen": 200.0,
     "last_price": 200.0,
-    "last_checked": "2026-06-18T17:37:09.661293+00:00",
+    "last_checked": "2026-06-18T16:24:47.274772+00:00",
     "availability": "uncertain",
-    "av_checked_at": "2026-06-25T01:17:28.054641+00:00",
+    "av_checked_at": "2026-06-25T00:04:23.266714+00:00",
+    "body": ""
+  },
+  "Reddit r/WorldCup2026Tickets|Selling (2) tickets for Face Value $1000/pair For Switzerland vs Bosnia today in L.A | Section C1113 Row 18||1u9cigy": {
+    "event": "Selling (2) tickets for Face Value $1000/pair For Switzerland vs Bosnia today in L.A | Section C1113 Row 18",
+    "platform": "Reddit r/WorldCup2026Tickets",
+    "date": "",
+    "venue": "",
+    "url": "https://www.reddit.com/r/WorldCup2026Tickets/comments/1u9cigy/selling_2_tickets_for_face_value_1000pair_for/",
+    "min_seen": 1000.0,
+    "last_price": 1000.0,
+    "last_checked": "2026-06-18T19:23:26.314940+00:00",
+    "availability": "uncertain",
+    "av_checked_at": "2026-06-25T00:04:23.266714+00:00",
     "body": ""
   },
   "VividSeats|2026 World Cup - Match 98 (W93 vs W94) (Quarter-Final)|2026-07-10T12:00:00|": {
@@ -915,12 +952,12 @@
     "venue": "SoFi Stadium",
     "url": "https://www.vividseats.com/world-cup-soccer-tickets-sofi-stadium-7-10-2026--sports-soccer/production/5080864",
     "min_seen": 3096.08,
-    "last_price": 3900.98,
-    "last_checked": "2026-06-25T02:21:49.549765+00:00",
+    "last_price": 3936.96,
+    "last_checked": "2026-06-25T00:04:23.266714+00:00",
     "price_note": "all-in",
-    "listing_count": 597,
-    "ticket_count": 1976,
-    "base_price": 2888.0,
+    "listing_count": 596,
+    "ticket_count": 1975,
+    "base_price": 2915.0,
     "_vs_id": "5080864",
     "best_qty": 1
   },
@@ -932,9 +969,9 @@
     "url": "https://www.reddit.com/r/WorldCup2026Tickets/comments/1ua587r/looking_for_1x_canada_vs_switzerland_budget_700/",
     "min_seen": 700.0,
     "last_price": 700.0,
-    "last_checked": "2026-06-19T17:51:28.685701+00:00",
+    "last_checked": "2026-06-19T17:14:07.525582+00:00",
     "availability": "uncertain",
-    "av_checked_at": "2026-06-25T01:17:28.054641+00:00",
+    "av_checked_at": "2026-06-24T20:44:40.803306+00:00",
     "body": ""
   },
   "Reddit r/WorldCup2026Tickets|Looking for 1x Canada vs Switzerland - Budget $1000 cad max - Meetup or PayPal deal only||1ub6tgf": {
@@ -945,9 +982,9 @@
     "url": "https://www.reddit.com/r/WorldCup2026Tickets/comments/1ub6tgf/looking_for_1x_canada_vs_switzerland_budget_1000/",
     "min_seen": 1000.0,
     "last_price": 1000.0,
-    "last_checked": "2026-06-21T03:52:52.229443+00:00",
+    "last_checked": "2026-06-21T03:32:12.437178+00:00",
     "availability": "uncertain",
-    "av_checked_at": "2026-06-25T01:17:28.054641+00:00",
+    "av_checked_at": "2026-06-24T20:44:40.803306+00:00",
     "body": ""
   },
   "Reddit r/WorldCup2026Tickets|Selling 2 tickets to Canada vs Switzerland - Section 449 - $1400 CAD each||1ucmnz8": {
@@ -958,9 +995,9 @@
     "url": "https://www.reddit.com/r/WorldCup2026Tickets/comments/1ucmnz8/selling_2_tickets_to_canada_vs_switzerland/",
     "min_seen": 1400.0,
     "last_price": 1400.0,
-    "last_checked": "2026-06-22T18:07:34.454673+00:00",
+    "last_checked": "2026-06-22T15:19:22.603381+00:00",
     "availability": "uncertain",
-    "av_checked_at": "2026-06-25T01:17:28.054641+00:00",
+    "av_checked_at": "2026-06-25T00:04:23.266714+00:00",
     "body": ""
   },
   "Reddit r/WorldCup2026Tickets|Canada vs Switzerland 2 tickets for sale cat1 section 242 row k June 24 $2200 etransfer only.||1ucw6h7": {
@@ -971,9 +1008,9 @@
     "url": "https://www.reddit.com/r/WorldCup2026Tickets/comments/1ucw6h7/canada_vs_switzerland_2_tickets_for_sale_cat1/",
     "min_seen": 2200.0,
     "last_price": 2200.0,
-    "last_checked": "2026-06-22T23:15:09.706533+00:00",
-    "availability": "uncertain",
-    "av_checked_at": "2026-06-25T01:17:28.054641+00:00",
+    "last_checked": "2026-06-22T23:22:07.827419+00:00",
+    "availability": "sold",
+    "av_checked_at": "2026-06-25T00:04:23.266714+00:00",
     "body": ""
   },
   "Reddit r/WorldCup2026Tickets|Selling 2 tickets to Canada vs Switzerland - Section 449 - $1200 CAD each||1udimgp": {
@@ -984,9 +1021,9 @@
     "url": "https://www.reddit.com/r/WorldCup2026Tickets/comments/1udimgp/selling_2_tickets_to_canada_vs_switzerland/",
     "min_seen": 1200.0,
     "last_price": 1200.0,
-    "last_checked": "2026-06-23T17:06:34.145135+00:00",
+    "last_checked": "2026-06-23T16:24:53.554005+00:00",
     "availability": "uncertain",
-    "av_checked_at": "2026-06-25T01:17:28.054641+00:00",
+    "av_checked_at": "2026-06-25T00:04:23.266714+00:00",
     "body": ""
   },
   "Reddit r/WorldCup2026Tickets|WTS: Canada v Switzerland Tickets - Section 229 Row 1, 2 Tickets- $1300 per ticket||1ue4tas": {
@@ -997,9 +1034,9 @@
     "url": "https://www.reddit.com/r/WorldCup2026Tickets/comments/1ue4tas/wts_canada_v_switzerland_tickets_section_229_row/",
     "min_seen": 1300.0,
     "last_price": 1300.0,
-    "last_checked": "2026-06-24T06:24:34.928156+00:00",
+    "last_checked": "2026-06-24T06:42:05.450289+00:00",
     "availability": "uncertain",
-    "av_checked_at": "2026-06-25T01:17:28.054641+00:00",
+    "av_checked_at": "2026-06-25T00:04:23.266714+00:00",
     "body": ""
   },
   "VividSeats|2026 World Cup - Switzerland vs TBD - Match 85|2026-07-02T20:00:00|": {
@@ -1009,11 +1046,11 @@
     "venue": "BC Place Stadium",
     "url": "https://www.vividseats.com/world-cup-soccer-tickets-bc-place-stadium-7-2-2026--sports-soccer/production/5080838",
     "min_seen": 724.86,
-    "last_price": 782.32,
-    "last_checked": "2026-06-25T02:21:49.549765+00:00",
+    "last_price": 783.2,
+    "last_checked": "2026-06-25T00:04:23.266714+00:00",
     "price_note": "all-in",
-    "listing_count": 635,
-    "ticket_count": 2020,
+    "listing_count": 638,
+    "ticket_count": 2032,
     "base_price": 622.25,
     "_vs_id": "5080838",
     "best_qty": 1
@@ -1024,13 +1061,13 @@
     "date": "2026-06-28T12:00:00",
     "venue": "SoFi Stadium",
     "url": "https://www.vividseats.com/world-cup-soccer-tickets-sofi-stadium-6-28-2026--sports-soccer/production/5080724",
-    "min_seen": 1103.88,
-    "last_price": 1247.56,
-    "last_checked": "2026-06-25T02:21:49.549765+00:00",
+    "min_seen": 1209.83,
+    "last_price": 1302.87,
+    "last_checked": "2026-06-25T00:04:23.266714+00:00",
     "price_note": "all-in",
-    "listing_count": 746,
-    "ticket_count": 2148,
-    "base_price": 923.0,
+    "listing_count": 756,
+    "ticket_count": 2200,
+    "base_price": 964.0,
     "_vs_id": "5080724",
     "best_qty": 1
   },
@@ -1042,22 +1079,9 @@
     "url": "https://www.reddit.com/r/WorldCup2026Tickets/comments/1uer3vd/selling_4_tickets_seated_together_to_match_85/",
     "min_seen": 1500.0,
     "last_price": 1500.0,
-    "last_checked": "2026-06-24T23:18:20.280870+00:00",
+    "last_checked": "2026-06-25T00:04:23.266714+00:00",
     "availability": "uncertain",
-    "av_checked_at": "2026-06-24T23:18:20.280870+00:00",
-    "body": ""
-  },
-  "Reddit r/WorldCup2026Tickets|My view for Canada vs Switzerland - BC Place Vancouver - Got Ticket Cat 1 for $800 on the Morning of the Match - Section||1uespxd": {
-    "event": "My view for Canada vs Switzerland - BC Place Vancouver - Got Ticket Cat 1 for $800 on the Morning of the Match - Section",
-    "platform": "Reddit r/WorldCup2026Tickets",
-    "date": "",
-    "venue": "",
-    "url": "https://www.reddit.com/r/WorldCup2026Tickets/comments/1uespxd/my_view_for_canada_vs_switzerland_bc_place/",
-    "min_seen": 800.0,
-    "last_price": 800.0,
-    "last_checked": "2026-06-24T23:18:20.280870+00:00",
-    "availability": "uncertain",
-    "av_checked_at": "2026-06-24T23:18:20.280870+00:00",
+    "av_checked_at": "2026-06-25T00:04:23.266714+00:00",
     "body": ""
   }
 }
